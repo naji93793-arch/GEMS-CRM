@@ -13,6 +13,7 @@ import Pipeline from './components/Pipeline';
 import ClientForm from './components/ClientForm';
 import Reports from './components/Reports';
 import AdminPanel from './components/AdminPanel';
+import TeamChat from './components/TeamChat';
 import { Download, Laptop, FileDown, Calendar, AlertCircle } from 'lucide-react';
 
 export default function App() {
@@ -199,6 +200,8 @@ export default function App() {
         return <Reports user={currentUser} />;
       case 'admin-panel':
         return <AdminPanel user={currentUser} clients={clients} />;
+      case 'team-chat':
+        return <TeamChat user={currentUser} />;
       default:
         return <Dashboard user={currentUser} clients={clients} />;
     }

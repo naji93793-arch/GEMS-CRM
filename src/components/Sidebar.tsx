@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { User } from '../types';
-import { LayoutDashboard, ClipboardList, UserPlus, BarChart3, LogOut, Menu, X, ShieldAlert, Settings, Key, Shield, Check, Mail, AlertTriangle } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, UserPlus, BarChart3, LogOut, Menu, X, ShieldAlert, Settings, Key, Shield, Check, Mail, AlertTriangle, MessageSquare } from 'lucide-react';
 import { GemsLogoSVG } from './Login';
 
 interface SidebarProps {
@@ -45,6 +45,7 @@ export default function Sidebar({ user, activeTab, setActiveTab, onLogout, onUse
     { id: 'pipeline', name: 'إدارة العملاء "Pipeline"', icon: ClipboardList },
     { id: 'add-client', name: 'إضافة عميل جديد', icon: UserPlus },
     { id: 'reports', name: 'تقارير الأداء ولوحة Looker', icon: BarChart3 },
+    { id: 'team-chat', name: 'دردشة فريق العمل', icon: MessageSquare },
     ...(isAuthorizedAdmin ? [{ id: 'admin-panel', name: 'إدارة النظام و الحسابات', icon: ShieldAlert }] : [])
   ];
 

@@ -93,8 +93,14 @@ export default function Dashboard({ user, clients }: DashboardProps) {
 
   // الموظفون الخمسة لغايات فلتر المشرف
   const employeesOnly = useMemo(() => {
-    return USERS.filter(u => u.role === 'employee');
-  }, []);
+    const rawUsers = localStorage.getItem('gems_crm_users_db');
+    const allUsers: User[] = rawUsers ? JSON.parse(rawUsers) : USERS;
+    const isNajiCurrentUser = user.email.toLowerCase() === 'naji93793@gmail.com' || user.username.toLowerCase().includes('naji');
+    return allUsers.filter(u => {
+      const isNajiAcc = u.email.toLowerCase() === 'naji93793@gmail.com' || u.username.toLowerCase().includes('naji');
+      return u.role === 'employee' && (isNajiCurrentUser || !isNajiAcc);
+    });
+  }, [user]);
 
   return (
     <div className="space-y-6 font-sans pb-8" dir="rtl">
