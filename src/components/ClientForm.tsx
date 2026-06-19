@@ -304,19 +304,24 @@ export default function ClientForm({ user, clients, onAddClient, setActiveTab }:
             <div>
               <label className="block text-slate-700 text-xs font-bold mb-1.5">إمارة العميل *</label>
               <div className="relative">
-                <select
+                <input
+                  type="text"
+                  list="emirates-suggestions"
                   value={emirate}
                   onChange={(e) => setEmirate(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white cursor-pointer"
-                >
-                  <option value="دبي">دبي</option>
-                  <option value="أبوظبي">أبوظبي</option>
-                  <option value="الشارقة">الشارقة</option>
-                  <option value="عجمان">عجمان</option>
-                  <option value="رأس الخيمة">رأس الخيمة</option>
-                  <option value="الفجيرة">الفجيرة</option>
-                  <option value="أم القيوين">أم القيوين</option>
-                </select>
+                  placeholder="اكتب الإمارة أو اختر من القائمة..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white"
+                  required
+                />
+                <datalist id="emirates-suggestions">
+                  <option value="دبي" />
+                  <option value="أبوظبي" />
+                  <option value="الشارقة" />
+                  <option value="عجمان" />
+                  <option value="رأس الخيمة" />
+                  <option value="الفجيرة" />
+                  <option value="أم القيوين" />
+                </datalist>
               </div>
             </div>
 

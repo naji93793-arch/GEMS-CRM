@@ -351,19 +351,24 @@ export default function Pipeline({ user, clients, onUpdateClient, onNavigateToAd
                 </div>
                 <div>
                   <label className="block text-slate-600 text-[11px] font-bold mb-1">الإمارة الجغرافية</label>
-                  <select
+                  <input
+                    type="text"
+                    list="edit-emirates-suggestions"
                     value={editingClient.emirate}
                     onChange={(e) => setEditingClient({ ...editingClient, emirate: e.target.value })}
-                    className="w-full text-right px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-red-500 cursor-pointer"
-                  >
-                    <option value="دبي">دبي</option>
-                    <option value="أبوظبي">أبوظبي</option>
-                    <option value="الشارقة">الشارقة</option>
-                    <option value="عجمان">عجمان</option>
-                    <option value="رأس الخيمة">رأس الخيمة</option>
-                    <option value="الفجيرة">الفجيرة</option>
-                    <option value="أم القيوين">أم القيوين</option>
-                  </select>
+                    placeholder="اكتب الإمارة أو اختر..."
+                    className="w-full text-right px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-red-500"
+                    required
+                  />
+                  <datalist id="edit-emirates-suggestions">
+                    <option value="دبي" />
+                    <option value="أبوظبي" />
+                    <option value="الشارقة" />
+                    <option value="عجمان" />
+                    <option value="رأس الخيمة" />
+                    <option value="الفجيرة" />
+                    <option value="أم القيوين" />
+                  </datalist>
                 </div>
                 <div>
                   <label className="block text-slate-600 text-[11px] font-bold mb-1">درجة اهتمام العميل</label>
