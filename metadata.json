@@ -1,0 +1,6 @@
+{
+  "name": "GEMS CRM",
+  "description": "نظام إدارة علاقات العملاء الذكي لشركة GEMS مع لوحات تحكم تفاعلية وإدارة كاملة للصلاحيات (RLS).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

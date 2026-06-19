@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f8fafc; /* gray-50 / slate-50 feel */
+}
+
+/* Custom scrollbars for a highly polished dashboard */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* طباعة احترافية مخصصة للتقارير بصيغة PDF */
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  /* إخفاء كافة عناصر الواجهة العادية بشكل كامل عند الطباعة */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* إظهار منطقة التقرير القابل للطباعة فقط وبكامل عريض الصفحة */
+  #printable-area, #printable-area * {
+    visibility: visible;
+  }
+  
+  #printable-area {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    background: white !important;
+  }
+
+  /* إلغاء الفراغات العشوائية ورؤوس الصفحات التلقائية للمتصفح */
+  @page {
+    margin: 1cm;
+    size: auto;
+  }
+}
