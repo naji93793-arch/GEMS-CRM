@@ -75,26 +75,28 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // تهيئة حسابات المستخدمين في localStorage وإتاحة بداية نظيفة وخالية من أي بيانات عشوائية قديمة
+  // تهيئة حسابات المستخدمين في localStorage وإتاحة بداية نظيفة مع إدماج الحسابات المطلوبة
   useEffect(() => {
-    const isCleanReset = localStorage.getItem('gems_crm_clean_v3_resetted');
+    const isCleanReset = localStorage.getItem('gems_crm_clean_v4_resetted');
 
     if (!isCleanReset) {
-      // 1. مسح وإعادة تعيين كلي لجميع ملفات العملاء للبدء بصفحة بيضاء تماماً (بدون بيانات وهمية)
-      localStorage.setItem('gems_crm_clients', '[]');
+      // المحافظة الاحتياطية والدائمة على سجل العملاء المدخلين مسبقاً لمنع أي حذف
+      const existingClients = localStorage.getItem('gems_crm_clients') || '[]';
+      localStorage.setItem('gems_crm_clients', existingClients);
       
-      // 2. تعيين الحسابات وقوائم الأمن للبداية الجديدة
+      // تعيين الحسابات وقوائم الأمن للبداية الجديدة مع الحسابات المحدثة
       localStorage.setItem('gems_crm_users_db', JSON.stringify(USERS));
       localStorage.setItem('gems_crm_passwords_db', JSON.stringify(USER_PASSWORDS));
       localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['saadabugabl@gmail.com', 'naji93793@gmail.com']));
       
-      // 3. تأكيد حفظ علامة إعادة التعديل والتنظيف
-      localStorage.setItem('gems_crm_clean_v3_resetted', 'true');
+      // تأكيد حفظ علامة الترقية والتعديل
+      localStorage.setItem('gems_crm_clean_v4_resetted', 'true');
     } else {
       // فحص أمان احتياطي للتأكد من المزامنة المستمرة لحسابات الدخول ومسح القديم
       const storedUsers = localStorage.getItem('gems_crm_users_db');
       const hasNaji = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'naji93793@gmail.com');
-      if (!storedUsers || !hasNaji) {
+      const hasAlaa = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'alaakhaledmekky61@gmail.com');
+      if (!storedUsers || !hasNaji || !hasAlaa) {
         localStorage.setItem('gems_crm_users_db', JSON.stringify(USERS));
         localStorage.setItem('gems_crm_passwords_db', JSON.stringify(USER_PASSWORDS));
         localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['saadabugabl@gmail.com', 'naji93793@gmail.com']));
@@ -290,13 +292,13 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           <div className="p-8 md:col-span-7 flex flex-col justify-center relative">
             
             {/* الشعار المدمج المماثل تماماً لشركة GEMS */}
-            <div className="mb-6 flex items-center gap-3">
-              <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center">
-                <GemsLogoSVG className="w-12 h-12" />
+            <div className="mb-6 flex items-center gap-2.5">
+              <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center">
+                <GemsLogoSVG className="w-10 h-10" />
               </div>
               <div>
-                <h1 className="text-2xl font-black text-slate-800 tracking-tight">نظام <span className="text-red-600">GEMS CRM</span> الذكي</h1>
-                <p className="text-slate-400 text-xs">نظام الإدارة الذكي للعملاء والمتابعات RLS</p>
+                <h1 className="text-xl font-black text-slate-800 tracking-tight">نظام <span className="text-red-600">GEMS CRM</span> الذكي</h1>
+                <p className="text-slate-400 text-[10px]">نظام الإدارة الذكي للعملاء والمتابعات RLS</p>
               </div>
             </div>
 
