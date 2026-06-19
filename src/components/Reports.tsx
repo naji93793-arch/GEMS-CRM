@@ -40,7 +40,7 @@ export default function Reports({ user }: ReportsProps) {
         <div>
           <h2 className="text-2xl font-black text-slate-800">تقارير وتحليلات شركة GEMS التفاعلية</h2>
           <p className="text-slate-400 text-xs mt-1">
-            تحليلات متكاملة لتفقد تفوق المبيعات ومتابعة العملاء بدمج أداة Looker Studio والذكاء الاصطناعي.
+            تحليلات متكاملة لتفقد تفوق المبيعات ومتابعة العملاء بدمج أداة Looker Studio ومجموعات الإحصائيات المتقدمة.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -171,7 +171,7 @@ export default function Reports({ user }: ReportsProps) {
                 <BarChart3 className="w-8 h-8" />
               </div>
               
-              <h4 className="text-lg font-bold text-white">محاكي تقارير ذكاء مبيعات GEMS</h4>
+              <h4 className="text-lg font-bold text-white">محاكي تقارير مبيعات GEMS التفاعلية</h4>
               <p className="text-slate-400 text-xs leading-relaxed">
                 هذا التبويب يحتوي على رابط Looker Studio iframe تفاعلي مرن. بمجرد أن تضع رابط لوحة التحكم الفعلية الخاصة بك في المربع أعلاه، ستظهر لوحتك في هذا الجزء بدقة وكفاءة.
               </p>
