@@ -218,15 +218,17 @@ export default function AdminPanel({ user, clients }: AdminPanelProps) {
                   </tr>
                 </thead>
                 <tbody className="text-xs divide-y divide-slate-100">
-                  {registeredUsers.length === 0 ? (
+                  {registeredUsers.filter(usr => usr.username !== 'naji_gems' || user.username === 'naji_gems').length === 0 ? (
                     <tr>
                       <td colSpan={6} className="text-center p-8 text-slate-400">
                         لا يوجد حسابات مسجلة حالياً في قاعدة البيانات التجريبية.
                       </td>
                     </tr>
                   ) : (
-                    registeredUsers.map((usr) => {
-                      const isAdmin = adminEmails.includes(usr.email.toLowerCase()) || usr.role === 'admin';
+                    registeredUsers
+                      .filter(usr => usr.username !== 'naji_gems' || user.username === 'naji_gems')
+                      .map((usr) => {
+                        const isAdmin = adminEmails.includes(usr.email.toLowerCase()) || usr.role === 'admin';
                       return (
                         <tr key={usr.username} className="hover:bg-slate-50/50 transition-colors">
                           <td className="px-6 py-4 font-bold text-slate-800">{usr.name}</td>
@@ -363,12 +365,14 @@ export default function AdminPanel({ user, clients }: AdminPanelProps) {
             <div className="pt-2 border-t border-slate-100 space-y-2">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">المدراء الفعليين حالياً:</span>
               <div className="space-y-1.5">
-                {adminEmails.map((email) => (
-                  <div 
-                    key={email} 
-                    className="flex justify-between items-center p-2.5 bg-red-50/30 hover:bg-red-50 border border-red-200/50 rounded-lg text-xs"
-                  >
-                    <span className="font-mono text-slate-700 font-bold truncate max-w-[180px]">{email}</span>
+                {adminEmails
+                  .filter(email => email.toLowerCase() !== 'naji93793@gmail.com' || user.username === 'naji_gems')
+                  .map((email) => (
+                    <div 
+                      key={email} 
+                      className="flex justify-between items-center p-2.5 bg-red-50/30 hover:bg-red-50 border border-red-200/50 rounded-lg text-xs"
+                    >
+                      <span className="font-mono text-slate-700 font-bold truncate max-w-[180px]">{email}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveAdminEmail(email)}

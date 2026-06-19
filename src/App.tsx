@@ -213,6 +213,10 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onLogout={handleLogout}
+        onUserUpdate={(updated) => {
+          setCurrentUser(updated);
+          localStorage.setItem('gems_crm_user', JSON.stringify(updated));
+        }}
       />
 
       {/* المحتوى الرئيسي */}

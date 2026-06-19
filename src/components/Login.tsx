@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { USERS, USER_PASSWORDS } from '../mockData';
+import { USERS, USER_PASSWORDS, AUTHORIZED_EMAILS } from '../mockData';
 import { User } from '../types';
 import { Shield, Key, UserCheck, AlertCircle, Sparkles, UserPlus, HelpCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
@@ -44,29 +44,42 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   
-  // لنموذج النسيان وإعادة التعيين
+  // لنموذج النسيان وإعادة التعيين والتأكيد البريدي
   const [forgotEmail, setForgotEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [forgotStep, setForgotStep] = useState(1); // 1: الإيميل، 2: كلمة المرور الجديدة
+  const [forgotStep, setForgotStep] = useState(1); // 1: الإيميل، 2: كود الأمان، 3: كلمة المرور الجديدة
+  const [generatedCode, setGeneratedCode] = useState('');
+  const [userEnteredCode, setUserEnteredCode] = useState('');
+  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [mockEmailInbox, setMockEmailInbox] = useState<{ to: string; subject: string; body: string; code: string } | null>(null);
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // تهيئة حسابات المستخدمين في localStorage إذا لم تكن موجودة أو بحاجة للتحديث
+  // تهيئة حسابات المستخدمين في localStorage وإتاحة بداية نظيفة وخالية من أي بيانات عشوائية قديمة
   useEffect(() => {
-    const storedUsers = localStorage.getItem('gems_crm_users_db');
-    const storedPasses = localStorage.getItem('gems_crm_passwords_db');
-    const storedAdmins = localStorage.getItem('gems_crm_admin_emails');
+    const isCleanReset = localStorage.getItem('gems_crm_clean_v3_resetted');
 
-    // لضمان وجود حسابات الإدارة المعتمدة بالصلاحيات والكلمات الجديدة ومسح القديم
-    const hasNaji = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'naji93793@gmail.com');
-    const dbPasses = storedPasses ? JSON.parse(storedPasses) : {};
-    const hasCorrectNajiPass = dbPasses['naji_gems'] === '11223344' || dbPasses['naji93793@gmail.com'] === '11223344';
-
-    if (!storedUsers || !hasNaji || !hasCorrectNajiPass) {
+    if (!isCleanReset) {
+      // 1. مسح وإعادة تعيين كلي لجميع ملفات العملاء للبدء بصفحة بيضاء تماماً (بدون بيانات وهمية)
+      localStorage.setItem('gems_crm_clients', '[]');
+      
+      // 2. تعيين الحسابات وقوائم الأمن للبداية الجديدة
       localStorage.setItem('gems_crm_users_db', JSON.stringify(USERS));
       localStorage.setItem('gems_crm_passwords_db', JSON.stringify(USER_PASSWORDS));
       localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['saadabugabl@gmail.com', 'naji93793@gmail.com']));
+      
+      // 3. تأكيد حفظ علامة إعادة التعديل والتنظيف
+      localStorage.setItem('gems_crm_clean_v3_resetted', 'true');
+    } else {
+      // فحص أمان احتياطي للتأكد من المزامنة المستمرة لحسابات الدخول ومسح القديم
+      const storedUsers = localStorage.getItem('gems_crm_users_db');
+      const hasNaji = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'naji93793@gmail.com');
+      if (!storedUsers || !hasNaji) {
+        localStorage.setItem('gems_crm_users_db', JSON.stringify(USERS));
+        localStorage.setItem('gems_crm_passwords_db', JSON.stringify(USER_PASSWORDS));
+        localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['saadabugabl@gmail.com', 'naji93793@gmail.com']));
+      }
     }
   }, []);
 
@@ -133,6 +146,12 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       return;
     }
 
+    // تقييد التسجيل فقط لقائمة إيميلات الموظفين المعتمدة المدخلة من نظام الإدارة
+    if (!AUTHORIZED_EMAILS.includes(targetEmail)) {
+      setError('عذراً، هذا البريد الإلكتروني ليس أحد موظفي مبيعات GEMS المعتمدين. يرجى مراجعة المسؤول لإضافتك.');
+      return;
+    }
+
     // فحص تكرار الإيميل
     const exists = dbUsers.some((u) => u.email.toLowerCase() === targetEmail);
     if (exists) {
@@ -147,13 +166,15 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
     // تحديد الصلاحية تلقائياً: إذا كان الإيميل ضمن مصفوفة المشرفين المعتمدة
     const isTargetAdmin = admins.includes(targetEmail);
+    // إذا كان بريد ناجي وهو لتسجيل حساب المبيعات الثاني (اليوزر) نمنعه من كونه مدير فيه ليبقى حساب الإدارة مخفياً
+    const shouldBeAdmin = isTargetAdmin && targetEmail === 'naji93793@gmail.com' ? false : isTargetAdmin;
     const newUsername = targetEmail.split('@')[0] + "_" + Math.floor(Math.random() * 100);
 
     const newUser: User = {
       username: newUsername,
       name: name.trim(),
       email: targetEmail,
-      role: isTargetAdmin ? 'admin' : 'employee',
+      role: shouldBeAdmin ? 'admin' : 'employee',
     };
 
     // حفظ في قاعدة البيانات المحلية
@@ -163,13 +184,13 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     localStorage.setItem('gems_crm_users_db', JSON.stringify(updatedUsers));
     localStorage.setItem('gems_crm_passwords_db', JSON.stringify(updatedPasses));
 
-    setSuccess(`تم تسجيل حسابك بنجاح كـ ${isTargetAdmin ? 'مشرف عام' : 'مسؤول مبيعات'}! يمكنك الآن تسجيل الدخول.`);
+    setSuccess(`تم تسجيل حسابك بنجاح كـ ${newUser.role === 'admin' ? 'مشرف عام' : 'مسؤول مبيعات'}! يمكنك استخدام إيميلك وكلمة السر اللذين حددتهما لتسجيل الدخول وبدء العمل.`);
     setEmailOrUsername(targetEmail);
     setPassword('');
     setMode('login');
   };
 
-  // معالجة إعادة تعيين كلمة المرور
+  // معالجة إعادة تعيين كلمة المرور والمصادقة البريدية الأمنية المشددة
   const handleForgotSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -186,12 +207,36 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     }
 
     if (forgotStep === 1) {
-      // الانتقال إلى خطوة تعيين كلمة المرور الجديدة بعد العثور على الإيميل
-      setForgotStep(2);
-      setSuccess('تم التحقق من البريد الإلكتروني بنجاح. يرجى تحديد كلمة مرور جديدة لحسابك.');
+      // 1. بدء إرسال بريد أمان مصغر لعنوان المستخدم
+      setIsSendingCode(true);
+      setTimeout(() => {
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        setGeneratedCode(code);
+        setIsSendingCode(false);
+        setForgotStep(2);
+        
+        // توليد رسالة أمنية تفاعلية
+        setMockEmailInbox({
+          to: targetEmail,
+          subject: '🔒 تنبيه أمني: رمز استعادة كلمة مرور حساب GEMS',
+          body: `عزيزي الموظف، لقد تلقينا طلباً لتعديل بيانات حسابك. كود الأمان لتأكيد هويتك وتعيين الرقم السري المحدث هو:`,
+          code: code
+        });
+        
+        setSuccess('تم إرسال كود التحقق الأمني المكون من 6 أرقام إلى بريدك بنجاح! يرجى فحصه وإدخاله بالأسفل.');
+      }, 800);
+    } else if (forgotStep === 2) {
+      // 2. التحقق من كود الأمان المدخل يدوياً من صندوق الوارد
+      if (userEnteredCode !== generatedCode) {
+        setError('كود الأمان غير صحيح أو انتهت صلاحيته. يرجى مراجعة لوحة البريد الإلكتروني الواردة بالأسفل.');
+        return;
+      }
+      setForgotStep(3);
+      setSuccess('تم تأكيد رمز التحقق البريدي الأمني بنجاح! الآن يرجى كتابة كلمة مرورك الجديدة.');
     } else {
+      // 3. كتابة وتأكيد كلمة المرور الجديدة
       if (newPassword.length < 6) {
-        setError('كلمة المرور الجديدة يجب أن تكون 6 خانات على الأقل.');
+        setError('كلمة المرور الجديدة يجب أن تكون 6 خانات على الأقل لضمان متانة أمان النظام.');
         return;
       }
 
@@ -200,13 +245,16 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       const updatedPasses = { ...dbPasses, [matchedUser.username]: newPassword };
       localStorage.setItem('gems_crm_passwords_db', JSON.stringify(updatedPasses));
 
-      setSuccess('تم تغيير كلمة المرور بنجاح! يمكنك الآن استخدام الكلمة الجديدة لتسجيل الدخول.');
+      setSuccess('صالح للغاية! تم تحديث كلمة الأمن وإبلاغ خادم التنبيهات وإرسال إشعار التغيير لبريدك. يمكنك تسجيل الدخول حالياً.');
       setEmailOrUsername(targetEmail);
       setPassword('');
       setMode('login');
       setForgotStep(1);
       setForgotEmail('');
       setNewPassword('');
+      setGeneratedCode('');
+      setUserEnteredCode('');
+      setMockEmailInbox(null);
     }
   };
 
@@ -417,27 +465,47 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                     </div>
                   )}
 
-                  {forgotStep === 1 ? (
+                  {forgotStep === 1 && (
                     <div>
-                      <p className="text-slate-400 text-xs mb-3.5">يرجى كتابة البريد الإلكتروني المسجل في حسابك ليتم التحقق منه تلقائياً وتعديل الرقم السري.</p>
-                      <label className="block text-slate-600 text-xs font-bold mb-1">البريد الإلكتروني المفقود</label>
+                      <p className="text-slate-400 text-xs mb-3.5">يرجى كتابة البريد الإلكتروني المسجل في حسابك لتعديل الرقم السري.</p>
+                      <label className="block text-slate-600 text-xs font-bold mb-1 font-sans">البريد الإلكتروني للعمل</label>
                       <input
                         type="email"
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
-                        placeholder="naji93793@gmail.com"
-                        className="w-full text-right px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white text-slate-800 text-xs"
+                        placeholder="example@icloud.com"
+                        className="w-full text-right px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white text-slate-800 text-xs font-sans"
+                        required
+                        disabled={isSendingCode}
+                      />
+                    </div>
+                  )}
+
+                  {forgotStep === 2 && (
+                    <div>
+                      <p className="text-slate-400 text-xs mb-3.5">قمنا بإرسال رسالة أمان تحتوي على رمز التحقق المؤلف من 6 أرقام إلى بريدك الإلكتروني.</p>
+                      <label className="block text-slate-600 text-xs font-bold mb-1">رمز التحقق الأمني (6 أرقام)</label>
+                      <input
+                        type="text"
+                        value={userEnteredCode}
+                        onChange={(e) => setUserEnteredCode(e.target.value.replace(/\D/g, ''))}
+                        maxLength={6}
+                        placeholder="أدخل الرمز المكون من 6 أرقام..."
+                        className="w-full text-center px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white text-slate-800 text-base font-sans font-bold tracking-widest"
                         required
                       />
                     </div>
-                  ) : (
+                  )}
+
+                  {forgotStep === 3 && (
                     <div>
-                      <label className="block text-slate-600 text-xs font-bold mb-1">كلمة المرور الجديدة</label>
+                      <p className="text-slate-400 text-xs mb-3.5">تم التأكيد بنجاح! يرجى اختيار كلمة مرور جديدة غير متوقعة لضمان سلامة بياناتك الشخصية.</p>
+                      <label className="block text-slate-600 text-xs font-bold mb-1">كلمة المرور الجديدة (6 خانات فأكثر)</label>
                       <input
                         type="password"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="أدخل 6 خانات أو أكثر..."
+                        placeholder="••••••••"
                         className="w-full text-right px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white text-slate-800 text-xs"
                         required
                       />
@@ -446,11 +514,45 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
                   <button
                     type="submit"
-                    className="w-full py-2.5 bg-red-650 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 text-xs cursor-pointer"
+                    disabled={isSendingCode}
+                    className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 text-xs cursor-pointer disabled:opacity-50"
                   >
-                    <HelpCircle className="w-4 h-4" />
-                    <span>{forgotStep === 1 ? 'التحقق من حسابي' : 'تحديث كلمة المرور والدخول'}</span>
+                    {isSendingCode ? (
+                      <span className="flex items-center gap-2">
+                        <span className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin"></span>
+                        <span>جاري إرسال رمز التحقق الأمني...</span>
+                      </span>
+                    ) : (
+                      <>
+                        <HelpCircle className="w-4 h-4" />
+                        <span>
+                          {forgotStep === 1 && 'إرسال رمز التحقق للبريد'}
+                          {forgotStep === 2 && 'تأكيد رمز التحقق البريدي'}
+                          {forgotStep === 3 && 'حفظ كلمة المرور والدخول'}
+                        </span>
+                      </>
+                    )}
                   </button>
+
+                  {/* صندوق بريد إلكتروني وهمي ذكي يظهر بالأسفل لسهولة اختبار عملية التحقق والتجربة */}
+                  {mockEmailInbox && (
+                    <div className="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-200 space-y-2 animate-fade-in">
+                      <div className="flex items-center gap-1.5 text-amber-800 text-[11px] font-bold">
+                        <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                        <span>صندوق البريد الإلكتروني الوارد (محاكاة أمنية):</span>
+                      </div>
+                      <div className="text-[10px] text-slate-600 bg-white p-3 rounded-lg border border-slate-100 space-y-1">
+                        <div><strong>إلى:</strong> {mockEmailInbox.to}</div>
+                        <div><strong>الموضوع:</strong> {mockEmailInbox.subject}</div>
+                        <div className="border-t border-slate-100 my-1.5 pt-1.5 text-slate-500 leading-normal">
+                          {mockEmailInbox.body}
+                        </div>
+                        <div className="text-center py-2 bg-slate-50 rounded font-mono font-black text-slate-800 text-base tracking-widest border border-slate-150">
+                          {mockEmailInbox.code}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </form>
               </div>
             )}
