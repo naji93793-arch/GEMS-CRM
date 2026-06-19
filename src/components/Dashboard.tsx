@@ -37,13 +37,14 @@ export default function Dashboard({ user, clients }: DashboardProps) {
   // الحسابات والإحصائيات
   const stats = useMemo(() => {
     const total = filteredClients.length;
-    const followUp = filteredClients.filter(c => c.status === 'متابعة').length;
+    const leadsCount = filteredClients.filter(c => c.status === 'العملاء المحتملون').length;
+    const activePipeline = filteredClients.filter(c => ['الفرص', 'المؤهلون', 'تقديم العرض', 'التفاوض'].includes(c.status)).length;
     const done = filteredClients.filter(c => c.status === 'نفذ').length;
     const notDone = filteredClients.filter(c => c.status === 'لم يتم التنفيذ').length;
 
     // المتابعة القادمة العاجلة (التي موعدها خلال الأيام القادمة)
     const urgentFollowups = filteredClients.filter(c => {
-      if (c.status !== 'متابعة' || !c.nextFollowup) return false;
+      if (c.status === 'نفذ' || c.status === 'لم يتم التنفيذ' || !c.nextFollowup) return false;
       const today = new Date();
       const followupDate = new Date(c.nextFollowup);
       const diffTime = followupDate.getTime() - today.getTime();
@@ -75,7 +76,8 @@ export default function Dashboard({ user, clients }: DashboardProps) {
 
     return {
       total,
-      followUp,
+      leadsCount,
+      activePipeline,
       done,
       notDone,
       urgentFollowups,
@@ -133,40 +135,57 @@ export default function Dashboard({ user, clients }: DashboardProps) {
         )}
       </div>
 
-      {/* الكروت الأربعة الرئيسية للتحليلات السريعة (KPI Cards) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* الكروت الخمسة الرئيسية للتحليلات السريعة (KPI Cards) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* كرت إجمالي العملاء */}
         <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
           <div className="absolute top-0 right-0 h-1 w-full bg-slate-400 group-hover:bg-red-500 transition-colors"></div>
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Total Leads إجمالي المحفظة</span>
-              <span className="text-3xl font-black text-slate-800">{stats.total}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">إجمالي المحفظة Portfolio</span>
+              <span className="text-2xl font-black text-slate-800">{stats.total}</span>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-slate-50 text-slate-400 flex items-center justify-center">
-              <Users className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-400 flex items-center justify-center">
+              <Users className="w-4.5 h-4.5" />
             </div>
           </div>
-          <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400">
-            <span>مسجلين تحت الإدارة والمتابعة</span>
-            <span className="text-green-500 font-bold">+12% ↑</span>
+          <div className="mt-2.5 flex items-center justify-between text-[11px] text-slate-400">
+            <span>مسجلين بالكامل</span>
+            <span className="text-green-500 font-bold">+100%</span>
           </div>
         </div>
 
-        {/* كرت عملاء قيد المتابعة - مع الفوكس هيدر الأحمر من التصميم */}
+        {/* كرت العملاء المحتملين */}
         <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm border-l-4 border-l-red-500 hover:shadow-md transition-all relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Active Deals المتابعة النشطة</span>
-              <span className="text-3xl font-black text-slate-800 text-slate-800">{stats.followUp}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">العملاء المحتملون Leads</span>
+              <span className="text-2xl font-black text-slate-800">{stats.leadsCount}</span>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
-              <ClipboardList className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-red-50 text-red-605 flex items-center justify-center">
+              <ClipboardList className="w-4.5 h-4.5" />
             </div>
           </div>
-          <div className="mt-3 flex items-center justify-between text-[11px]">
-            <span className="text-slate-400">{stats.total > 0 ? Math.round((stats.followUp / stats.total) * 100) : 0}% من الإجمالي</span>
-            <span className="text-red-500 font-bold">Focus Needed</span>
+          <div className="mt-2.5 flex items-center justify-between text-[11px]">
+            <span className="text-slate-400">{stats.total > 0 ? Math.round((stats.leadsCount / stats.total) * 100) : 0}% من المحفظة</span>
+            <span className="text-red-500 font-bold">جديد</span>
+          </div>
+        </div>
+
+        {/* كرت الصفقات الجارية */}
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm border-l-4 border-l-blue-500 hover:shadow-md transition-all relative overflow-hidden group">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">الصفقات الجارية Pipeline</span>
+              <span className="text-2xl font-black text-slate-800 text-blue-600">{stats.activePipeline}</span>
+            </div>
+            <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <ClipboardList className="w-4.5 h-4.5 animate-pulse" />
+            </div>
+          </div>
+          <div className="mt-2.5 flex items-center justify-between text-[11px]">
+            <span className="text-slate-400">{stats.total > 0 ? Math.round((stats.activePipeline / stats.total) * 100) : 0}% قيد التفاوض والعمل</span>
+            <span className="text-blue-500 font-bold">نشط</span>
           </div>
         </div>
 
@@ -174,16 +193,16 @@ export default function Dashboard({ user, clients }: DashboardProps) {
         <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm border-l-4 border-l-green-500 hover:shadow-md transition-all relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Closure Rate صفقات ناجحة "نفذ"</span>
-              <span className="text-3xl font-black text-slate-800 text-slate-800">{stats.done}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">الصفقات الناجحة Won</span>
+              <span className="text-2xl font-black text-emerald-600">{stats.done}</span>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <CheckCircle2 className="w-4.5 h-4.5" />
             </div>
           </div>
-          <div className="mt-3 flex items-center justify-between text-[11px]">
+          <div className="mt-2.5 flex items-center justify-between text-[11px]">
             <span className="text-slate-400">{stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0}% صفقات رابحة</span>
-            <span className="text-emerald-500 font-bold">Avg. 14 days</span>
+            <span className="text-emerald-500 font-bold">ناجح وكامل</span>
           </div>
         </div>
 
@@ -191,16 +210,16 @@ export default function Dashboard({ user, clients }: DashboardProps) {
         <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm border-l-4 border-l-slate-400 hover:shadow-md transition-all relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Closed Deals غير منفذة</span>
-              <span className="text-3xl font-black text-slate-800 text-slate-800">{stats.notDone}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">الصفقات المغلقة Lost</span>
+              <span className="text-2xl font-black text-slate-500">{stats.notDone}</span>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center">
-              <XCircle className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center">
+              <XCircle className="w-4.5 h-4.5" />
             </div>
           </div>
-          <div className="mt-3 flex items-center justify-between text-[11px]">
-            <span className="text-slate-400">{stats.total > 0 ? Math.round((stats.notDone / stats.total) * 100) : 0}% من المحفظة</span>
-            <span className="text-slate-400 font-bold">Inactive</span>
+          <div className="mt-2.5 flex items-center justify-between text-[11px]">
+            <span className="text-slate-400">{stats.total > 0 ? Math.round((stats.notDone / stats.total) * 100) : 0}% غير منفذة</span>
+            <span className="text-slate-400 font-bold">مغلق</span>
           </div>
         </div>
       </div>
@@ -317,7 +336,7 @@ export default function Dashboard({ user, clients }: DashboardProps) {
             {employeesOnly.map((emp) => {
               const empClients = clients.filter(c => c.ownerEmail === emp.email);
               const empDone = empClients.filter(c => c.status === 'نفذ').length;
-              const empPending = empClients.filter(c => c.status === 'متابعة').length;
+              const empPending = empClients.filter(c => c.status !== 'نفذ' && c.status !== 'لم يتم التنفيذ').length;
               
               return (
                 <div key={emp.email} className="bg-slate-50 p-4 border border-slate-150 rounded-xl relative overflow-hidden">
@@ -330,7 +349,7 @@ export default function Dashboard({ user, clients }: DashboardProps) {
                       <span className="text-xs font-black text-emerald-600">{empDone}</span>
                     </div>
                     <div>
-                      <span className="block text-[9px] text-slate-400">متابعة</span>
+                      <span className="block text-[9px] text-slate-400">تحت العمل</span>
                       <span className="text-xs font-black text-blue-600">{empPending}</span>
                     </div>
                   </div>

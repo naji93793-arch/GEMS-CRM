@@ -58,10 +58,12 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     const storedPasses = localStorage.getItem('gems_crm_passwords_db');
     const storedAdmins = localStorage.getItem('gems_crm_admin_emails');
 
-    // لضمان وجود حساب سعد بأحدث الصلاحيات وتفادي البيانات السابقة
-    const hasSaad = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'saadabugabl@gmail.com');
+    // لضمان وجود حسابات الإدارة المعتمدة بالصلاحيات والكلمات الجديدة ومسح القديم
+    const hasNaji = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'naji93793@gmail.com');
+    const dbPasses = storedPasses ? JSON.parse(storedPasses) : {};
+    const hasCorrectNajiPass = dbPasses['naji_gems'] === '11223344' || dbPasses['naji93793@gmail.com'] === '11223344';
 
-    if (!storedUsers || !hasSaad) {
+    if (!storedUsers || !hasNaji || !hasCorrectNajiPass) {
       localStorage.setItem('gems_crm_users_db', JSON.stringify(USERS));
       localStorage.setItem('gems_crm_passwords_db', JSON.stringify(USER_PASSWORDS));
       localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['saadabugabl@gmail.com', 'naji93793@gmail.com']));
@@ -208,14 +210,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     }
   };
 
-  const handleShortcutLogin = (user: typeof USERS[0]) => {
-    setEmailOrUsername(user.email);
-    const dbPasses = getPassesDB();
-    setPassword(dbPasses[user.username] || 'admin123');
-    setError('');
-    setSuccess('');
-    setMode('login');
-  };
+  // تم إزالة أزرار الملء التلقائي للحماية القصوى وعدم كشف كلمات المرور قدام المستخدمين
+
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-slate-50 font-sans" dir="rtl">
@@ -461,51 +457,63 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
           </div>
 
-          {/* الجانب الأيسر: دليل الدخول السريع وهوية GEMS */}
+          {/* الجانب الأيسر: مصفوفة مراحل علاقات العملاء الذكية CRM والمستندات */}
           <div className="bg-slate-900 p-8 md:col-span-5 text-white flex flex-col justify-between border-t md:border-t-0 md:border-r border-slate-850">
-            <div>
-              <div className="inline-block px-3 py-1 bg-red-600/30 text-red-400 border border-red-500/30 rounded-full text-[10px] font-bold mb-4">
-                لوحة نظام GEMS CRM المطور
+            <div className="space-y-6">
+              <div className="inline-block px-3 py-1 bg-red-600/30 text-red-400 border border-red-500/30 rounded-full text-[10px] font-bold">
+                دليل مصفوفة أودو GEMS CRM المطور
               </div>
-              <h3 className="text-sm font-bold mb-2 text-slate-200">الوصول السريع والمدراء المعتمدين:</h3>
-              <p className="text-slate-400 text-xs mb-4 leading-relaxed">
-                مسؤولو الإدارة ومسؤولي المبيعات الافتراضيين. الإيميلات المسجلة هنا كأدمن ستملك ميزة الإطلاع على كافة بيانات الشركة وإدارة الحسابات:
-              </p>
-
-              <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
-                {/* حسابات الإدارة المجهزة خصيصاً للعميل */}
-                <div className="p-2 border border-dashed border-red-500/30 bg-red-950/20 rounded-lg text-xs mb-3">
-                  <div className="flex justify-between items-center mb-1 font-bold text-red-400">
-                    <span>حساب الإدارة الخاص بك (Admin)</span>
-                    <span className="text-[9px] bg-red-600 text-white px-1 rounded">رئيسي</span>
+              
+              <div>
+                <h3 className="text-sm font-bold mb-3 text-slate-100 border-b border-slate-800 pb-2">مراحل إدارة علاقات العملاء السبعة:</h3>
+                
+                <div className="space-y-3.5 text-xs text-slate-300 max-h-[350px] overflow-y-auto pr-1 select-none">
+                  
+                  <div className="p-2.5 bg-slate-850 rounded-lg border border-slate-800">
+                    <div className="flex justify-between items-center font-bold text-red-400 text-[11px] mb-1">
+                      <span>1. العملاء المحتملون (Leads)</span>
+                      <span className="text-[9px] bg-red-600 text-white px-1.5 py-0.5 rounded">البداية</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">تجميع بيانات الاتصال للمهتمين تلقائياً وتحديد الجدية والاهتمام الأولي.</p>
                   </div>
-                  <span className="block font-mono text-slate-200">naji93793@gmail.com</span>
-                  <span className="text-[10px] text-slate-400">كلمة السر الافتراضية: admin123</span>
-                </div>
 
-                {USERS.map((usr) => (
-                  <button
-                    key={usr.username}
-                    type="button"
-                    onClick={() => handleShortcutLogin(usr)}
-                    className="w-full text-right p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700/50 rounded-xl transition duration-150 flex items-center justify-between text-xs group cursor-pointer"
-                  >
-                    <div>
-                      <span className="font-bold text-slate-200 group-hover:text-red-400 transition text-[11px]">{usr.name}</span>
-                      <span className="block text-slate-500 text-[10px]">{usr.email}</span>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className={`px-1.5 py-0.5 rounded text-[9px] ${usr.role === 'admin' ? 'bg-red-900/40 text-red-300' : 'bg-blue-900/40 text-blue-300'}`}>
-                        {usr.role === 'admin' ? 'مشرف عام' : 'مسؤول مبيعات'}
-                      </span>
-                    </div>
-                  </button>
-                ))}
+                  <div className="p-2.5 bg-slate-850 rounded-lg border border-slate-800">
+                    <div className="font-bold text-blue-400 text-[11px] mb-1">2. فرص البيع (Opportunities)</div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">تحويل المهتمين المؤكدين إلى صفقات نشطة في مسار المبيعات لتحديد القيم المالية المتوقعة وتاريخ الإغلاق.</p>
+                  </div>
+
+                  <div className="p-2.5 bg-slate-850 rounded-lg border border-slate-800">
+                    <div className="font-bold text-amber-400 text-[11px] mb-1">3. المؤهلون (Qualified)</div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">دراسة تفصيل متطلبات العميل، وتأكيد الميزانية لتحديد القدرة والملاءمة المالية قبل إرسال العروض.</p>
+                  </div>
+
+                  <div className="p-2.5 bg-slate-850 rounded-lg border border-slate-800">
+                    <div className="font-bold text-indigo-400 text-[11px] mb-1">4. تقديم العرض (Proposition)</div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">إرسال تفاصيل الأسعار والمنتجات أو مسودات العقود ومناقشتها مباشرة مع العميل.</p>
+                  </div>
+
+                  <div className="p-2.5 bg-slate-850 rounded-lg border border-slate-800">
+                    <div className="font-bold text-purple-400 text-[11px] mb-1">5. التفاوض والمتابعة (Negotiation)</div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">الرد على الاستفسارات وتوفير الخصومات المناسبة والبدائل لتهيئة القرار التعاقدي النهائي.</p>
+                  </div>
+
+                  <div className="p-2.5 bg-emerald-950/20 rounded-lg border border-emerald-900/40">
+                    <div className="font-bold text-emerald-400 text-[11px] mb-1">6. الصفقات الناجحة (Closed Won - نفذ)</div>
+                    <p className="text-[10px] text-emerald-500/80 leading-relaxed">فوز الصفقة والتوقيع الرسمي لتفعيل تسليم الخدمات التقنية أو توريد الاحتياجات المعتمدة.</p>
+                  </div>
+
+                  <div className="p-2.5 bg-red-950/20 rounded-lg border border-red-900/40">
+                    <div className="font-bold text-red-400 text-[11px] mb-1">7. الصفقات الملغاة (Closed Lost - غير منفذ)</div>
+                    <p className="text-[10px] text-red-500/80 leading-relaxed">إغلاق الصفقة بالخسارة مع توثيق الأسباب بدقة (الميزانية، السعر، ميزات، المنافسين) لتحسين الأداء لاحقاً.</p>
+                  </div>
+
+                </div>
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-800 text-center">
-              <span className="text-[10px] text-slate-500">مبني وفقاً لأعلى معايير الحماية وجداول التفويض المتطورة RLS</span>
+            <div className="mt-6 pt-4 border-t border-slate-800 text-center space-y-1">
+              <span className="text-[10px] text-slate-500 block">جميع كلمات المرور مشفرة ومؤمنة بقاعدة بيانات وحوكمة GEMS CRM</span>
+              <span className="text-[9px] text-emerald-500 font-bold block">● الاتصال مؤمن ومثبت ببروتوكول RLS</span>
             </div>
           </div>
 

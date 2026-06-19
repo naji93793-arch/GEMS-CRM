@@ -11,7 +11,7 @@ export interface Client {
   emirate: string; // الإمارة
   clientFeedback: string; // إفادة العميل
   partnerFeedback: string; // إفادة الشريك
-  status: 'متابعة' | 'نفذ' | 'لم يتم التنفيذ'; // الحالة
+  status: 'العملاء المحتملون' | 'الفرص' | 'المؤهلون' | 'تقديم العرض' | 'التفاوض' | 'نفذ' | 'لم يتم التنفيذ'; // مراحل الـ CRM السبعة
   addDate: string; // تاريخ إضافة العميل
   lastContact: string; // آخر تواصل
   nextFollowup: string; // موعد المتابعة القادمة

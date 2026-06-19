@@ -30,7 +30,7 @@ export default function Pipeline({ user, clients, onUpdateClient, onNavigateToAd
   const [selectedOwnerEmail, setSelectedOwnerEmail] = useState('all');
 
   // حالة طباعة وتحميل قائمة معينة كـ PDF
-  const [printStage, setPrintStage] = useState<'متابعة' | 'نفذ' | 'لم يتم التنفيذ' | null>(null);
+  const [printStage, setPrintStage] = useState<'العملاء المحتملون' | 'الفرص' | 'المؤهلون' | 'تقديم العرض' | 'التفاوض' | 'نفذ' | 'لم يتم التنفيذ' | null>(null);
 
   // العميل المختار للتعديل التفصيلي
   const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -63,10 +63,14 @@ export default function Pipeline({ user, clients, onUpdateClient, onNavigateToAd
     });
   }, [clients, user, searchTerm, selectedEmirate, selectedInterest, selectedOwnerEmail]);
 
-  // تقسيم العملاء إلى الأعمدة الـ 3 الخاصة بالـ Pipeline
+  // تقسيم العملاء إلى الأعمدة السبعة الخاصة بالـ Pipeline
   const columns = useMemo(() => {
     return {
-      'متابعة': processedClients.filter(c => c.status === 'متابعة'),
+      'العملاء المحتملون': processedClients.filter(c => c.status === 'العملاء المحتملون'),
+      'الفرص': processedClients.filter(c => c.status === 'الفرص'),
+      'المؤهلون': processedClients.filter(c => c.status === 'المؤهلون'),
+      'تقديم العرض': processedClients.filter(c => c.status === 'تقديم العرض'),
+      'التفاوض': processedClients.filter(c => c.status === 'التفاوض'),
       'نفذ': processedClients.filter(c => c.status === 'نفذ'),
       'لم يتم التنفيذ': processedClients.filter(c => c.status === 'لم يتم التنفيذ'),
     };
@@ -104,7 +108,7 @@ export default function Pipeline({ user, clients, onUpdateClient, onNavigateToAd
   };
 
   // نقل سريع للعميل بين المراحل مباشرة من شاشة الكرت
-  const handleQuickStatusMove = (client: Client, newStatus: 'متابعة' | 'نفذ' | 'لم يتم التنفيذ') => {
+  const handleQuickStatusMove = (client: Client, newStatus: 'العملاء المحتملون' | 'الفرص' | 'المؤهلون' | 'تقديم العرض' | 'التفاوض' | 'نفذ' | 'لم يتم التنفيذ') => {
     const updated = { ...client, status: newStatus };
     if (newStatus === 'لم يتم التنفيذ') {
       // إجبار إعطاء سبب بفتحه في نافذة التعديل التفصيلية لضمان عدم وجود Placeholders مجهولة
@@ -198,116 +202,86 @@ export default function Pipeline({ user, clients, onUpdateClient, onNavigateToAd
       </div>
 
       {/* لوحات الـ Pipeline (3 أعمدة عريضة متجاوبة) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* العمود الأول: قيد المتابعة */}
-        <div className="bg-slate-50 p-4 border border-gray-200 shadow-sm rounded-xl flex flex-col min-h-[500px]">
-          <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-200">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse"></div>
-              <h3 className="font-extrabold text-slate-800 text-xs">قيد المتابعة والاتصالات</h3>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => setPrintStage('متابعة')}
-                className="p-1 bg-white hover:bg-blue-50 text-slate-500 hover:text-blue-650 border border-slate-200 rounded-lg cursor-pointer transition flex items-center gap-1 text-[10px] font-bold"
-                title="تحميل / طباعة تقرير قيد المتابعة كـ PDF"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span className="text-[9px] hidden sm:inline">PDF</span>
-              </button>
-              <span className="bg-blue-100 text-blue-700 text-[11px] px-2.5 py-0.5 rounded-full font-bold">
-                {columns['متابعة'].length} عميل
-              </span>
-            </div>
-          </div>
+      {/* مصفوفة المراحل السبعة - مسار المبيعات التفاعلي (CRM Kanban Board) */}
+      <p className="text-[11px] text-slate-400 -mt-2">← تصفح المراحل بسحب الشاشة أفقياً يميناً ويساراً للتنقل الكامل ومتابعة نمو الصفقات</p>
+      
+      <div className="flex gap-4 overflow-x-auto pb-6 pt-1 select-none scrollbar-thin max-w-full">
+        {(['العملاء المحتملون', 'الفرص', 'المؤهلون', 'تقديم العرض', 'التفاوض', 'نفذ', 'لم يتم التنفيذ'] as const).map(stageKey => {
+          let badgeColor = '';
+          let dotColor = '';
+          let stageTitle = '';
 
-          <div className="space-y-3 flex-grow overflow-y-auto max-h-[600px] scrollbar-thin">
-            {columns['متابعة'].map(client => (
-              <ClientCard 
-                key={client.id} 
-                client={client} 
-                onEdit={handleOpenEdit} 
-                onStatusMove={handleQuickStatusMove}
-                onDelete={onDeleteClient}
-              />
-            ))}
-            {columns['متابعة'].length === 0 && <EmptyColumnState />}
-          </div>
-        </div>
+          if (stageKey === 'العملاء المحتملون') {
+            stageTitle = '1. العملاء المحتملون (Leads)';
+            dotColor = 'bg-red-500';
+            badgeColor = 'bg-red-50 text-red-700 border border-red-200/50';
+          } else if (stageKey === 'الفرص') {
+            stageTitle = '2. الفرص (Opportunities)';
+            dotColor = 'bg-blue-500';
+            badgeColor = 'bg-blue-50 text-blue-700 border border-blue-200/50';
+          } else if (stageKey === 'المؤهلون') {
+            stageTitle = '3. المؤهلون (Qualified)';
+            dotColor = 'bg-amber-500';
+            badgeColor = 'bg-amber-50 text-amber-700 border border-amber-200/50';
+          } else if (stageKey === 'تقديم العرض') {
+            stageTitle = '4. تقديم العرض (Proposition)';
+            dotColor = 'bg-indigo-500';
+            badgeColor = 'bg-indigo-50 text-indigo-700 border border-indigo-200/50';
+          } else if (stageKey === 'التفاوض') {
+            stageTitle = '5. التفاوض (Negotiation)';
+            dotColor = 'bg-purple-500';
+            badgeColor = 'bg-purple-50 text-purple-700 border border-purple-200/50';
+          } else if (stageKey === 'نفذ') {
+            stageTitle = '6. تم البيع والتعاقد (Won)';
+            dotColor = 'bg-emerald-500 animate-pulse';
+            badgeColor = 'bg-emerald-50 text-emerald-700 border border-emerald-200/50';
+          } else {
+            stageTitle = '7. الصفقات الملغاة (Lost)';
+            dotColor = 'bg-slate-400';
+            badgeColor = 'bg-slate-50 text-slate-600 border border-slate-200';
+          }
 
-        {/* العمود الثاني: تم التنفيذ بنجاح */}
-        <div className="bg-slate-50 p-4 border border-gray-200 shadow-sm rounded-xl flex flex-col min-h-[500px]">
-          <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-200">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full"></div>
-              <h3 className="font-extrabold text-slate-800 text-xs">تم التنفيذ والتعاقد بنجاح</h3>
+          const stageClients = columns[stageKey] || [];
+
+          return (
+            <div 
+              key={stageKey}
+              className="w-[285px] md:w-[320px] flex-shrink-0 bg-slate-50 p-4 border border-gray-200 shadow-sm rounded-xl flex flex-col min-h-[500px]"
+            >
+              <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-200">
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${dotColor}`}></div>
+                  <h3 className="font-extrabold text-slate-800 text-[11px] truncate" title={stageTitle}>{stageTitle}</h3>
+                </div>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <button
+                    onClick={() => setPrintStage(stageKey)}
+                    className="p-1 bg-white hover:bg-slate-150 text-slate-500 hover:text-red-600 border border-slate-200 rounded-lg cursor-pointer transition flex items-center justify-center"
+                    title={`طباعة تقرير ${stageTitle} كـ PDF`}
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                  </button>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${badgeColor}`}>
+                    {stageClients.length} عميل
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3 flex-grow overflow-y-auto max-h-[600px] scrollbar-thin">
+                {stageClients.map(client => (
+                  <ClientCard 
+                    key={client.id} 
+                    client={client} 
+                    onEdit={handleOpenEdit} 
+                    onStatusMove={handleQuickStatusMove}
+                    onDelete={onDeleteClient}
+                  />
+                ))}
+                {stageClients.length === 0 && <EmptyColumnState />}
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => setPrintStage('نفذ')}
-                className="p-1 bg-white hover:bg-emerald-50 text-slate-500 hover:text-emerald-650 border border-slate-200 rounded-lg cursor-pointer transition flex items-center gap-1 text-[10px] font-bold"
-                title="تحميل / طباعة تقرير الصفقات الناجحة كـ PDF"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span className="text-[9px] hidden sm:inline">PDF</span>
-              </button>
-              <span className="bg-emerald-100 text-emerald-700 text-[11px] px-2.5 py-0.5 rounded-full font-bold">
-                {columns['نفذ'].length} عملاء
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-3 flex-grow overflow-y-auto max-h-[600px] scrollbar-thin">
-            {columns['نفذ'].map(client => (
-              <ClientCard 
-                key={client.id} 
-                client={client} 
-                onEdit={handleOpenEdit} 
-                onStatusMove={handleQuickStatusMove}
-                onDelete={onDeleteClient}
-              />
-            ))}
-            {columns['نفذ'].length === 0 && <EmptyColumnState />}
-          </div>
-        </div>
-
-        {/* العمود الثالث: لم يتم التنفيذ */}
-        <div className="bg-slate-50 p-4 border border-gray-200 shadow-sm rounded-xl flex flex-col min-h-[500px]">
-          <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-200">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
-              <h3 className="font-extrabold text-slate-800 text-xs">الصفقات الملغاة / لم ينفذ</h3>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => setPrintStage('لم يتم التنفيذ')}
-                className="p-1 bg-white hover:bg-red-50 text-slate-500 hover:text-red-650 border border-slate-200 rounded-lg cursor-pointer transition flex items-center gap-1 text-[10px] font-bold"
-                title="تحميل / طباعة تقرير العملاء المرفوضين كـ PDF"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span className="text-[9px] hidden sm:inline">PDF</span>
-              </button>
-              <span className="bg-red-100 text-red-700 text-[11px] px-2.5 py-0.5 rounded-full font-bold">
-                {columns['لم يتم التنفيذ'].length} عملاء
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-3 flex-grow overflow-y-auto max-h-[600px] scrollbar-thin">
-            {columns['لم يتم التنفيذ'].map(client => (
-              <ClientCard 
-                key={client.id} 
-                client={client} 
-                onEdit={handleOpenEdit} 
-                onStatusMove={handleQuickStatusMove}
-                onDelete={onDeleteClient}
-              />
-            ))}
-            {columns['لم يتم التنفيذ'].length === 0 && <EmptyColumnState />}
-          </div>
-        </div>
-
+          );
+        })}
       </div>
 
       {/* نافذة التعديل السريع المنبثقة (Edit Client Modal) */}
@@ -476,9 +450,13 @@ export default function Pipeline({ user, clients, onUpdateClient, onNavigateToAd
                       }}
                       className="w-full text-right px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500 cursor-pointer"
                     >
-                      <option value="متابعة">متابعة وعمليات جارية (Follow-up)</option>
-                      <option value="نفذ">نفذ وتم التعاقد (Closed Won)</option>
-                      <option value="لم يتم التنفيذ">لم يتم التنفيذ / ملغى (Closed Lost)</option>
+                      <option value="العملاء المحتملون">1. عميل محتمل (Lead)</option>
+                      <option value="الفرص">2. فرصة بيع (Opportunity)</option>
+                      <option value="المؤهلون">3. مؤهل تمويلي/مالي (Qualified)</option>
+                      <option value="تقديم العرض">4. تقديم عرض فني/مالي (Proposition)</option>
+                      <option value="التفاوض">5. التفاوض والمراجعة (Negotiation)</option>
+                      <option value="نفذ">6. نفذ وتم التعاقد (Closed Won)</option>
+                      <option value="لم يتم التنفيذ">7. لم يتم التنفيذ / ملغى (Closed Lost)</option>
                     </select>
                   </div>
 
@@ -588,8 +566,12 @@ export default function Pipeline({ user, clients, onUpdateClient, onNavigateToAd
                 {/* شارة المستند وحالته */}
                 <div className="text-center py-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
                   <h2 className="text-base font-black text-slate-800">
-                    {printStage === 'متابعة' && 'تقرير العملاء قيد المتابعة والاتصالات النشطة'}
-                    {printStage === 'نفذ' && 'كشف الصفقات والتعاقدات المنفذة والناجحة'}
+                    {printStage === 'العملاء المحتملون' && 'تقرير العملاء وفئة الاهتمام الأولية (Leads)'}
+                    {printStage === 'الفرص' && 'تقرير الفرص البيعية المؤكدة (Opportunities)'}
+                    {printStage === 'المؤهلون' && 'تقرير العملاء المؤهلين مالياً وتمويلياً (Qualified)'}
+                    {printStage === 'تقديم العرض' && 'تقرير عروض الأسعار والمواصفات المقترحة (Proposition)'}
+                    {printStage === 'التفاوض' && 'سجل المفاوضات ومراجعة العقود والميزانيات (Negotiation)'}
+                    {printStage === 'نفذ' && 'كشف الصفقات والتعاقدات البيعية الناجحة'}
                     {printStage === 'لم يتم التنفيذ' && 'سجل العملاء المرفوضين (حالة عدم التنفيذ والإلغاء)'}
                   </h2>
                   <p className="text-[10px] text-slate-455">
@@ -691,7 +673,7 @@ interface ClientCardProps {
   key?: string;
   client: Client;
   onEdit: (client: Client) => void;
-  onStatusMove: (client: Client, next: 'متابعة' | 'نفذ' | 'لم يتم التنفيذ') => void;
+  onStatusMove: (client: Client, next: 'العملاء المحتملون' | 'الفرص' | 'المؤهلون' | 'تقديم العرض' | 'التفاوض' | 'نفذ' | 'لم يتم التنفيذ') => void;
   onDelete: (id: string) => void;
 }
 
@@ -703,13 +685,19 @@ function ClientCard({ client, onEdit, onStatusMove, onDelete }: ClientCardProps)
   };
 
   const getStatusBadgeColor = (status: string) => {
-    if (status === 'متابعة') return 'bg-blue-105/8 bg-blue-100 text-blue-800 border-blue-200';
-    if (status === 'نفذ') return 'bg-emerald-110/8 bg-emerald-100 text-emerald-800 border-emerald-250';
-    return 'bg-red-105/8 bg-red-100 text-red-800 border-red-250';
+    switch (status) {
+      case 'العملاء المحتملون': return 'bg-red-50 text-red-700 border-red-200';
+      case 'الفرص': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'المؤهلون': return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'تقديم العرض': return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      case 'التفاوض': return 'bg-purple-50 text-purple-700 border-purple-200';
+      case 'نفذ': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      default: return 'bg-slate-50 text-slate-700 border-slate-200';
+    }
   };
 
   const isUrgent = useMemo(() => {
-    if (client.status !== 'متابعة' || !client.nextFollowup) return false;
+    if (client.status === 'نفذ' || client.status === 'لم يتم التنفيذ' || !client.nextFollowup) return false;
     const diff = new Date(client.nextFollowup).getTime() - new Date().getTime();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
     return days <= 3;
@@ -770,7 +758,7 @@ function ClientCard({ client, onEdit, onStatusMove, onDelete }: ClientCardProps)
           <span className="text-slate-400">آخر اتصال ({client.contactCount || 0} مرات):</span>
           <span className="font-sans font-bold text-slate-650">{client.lastContact}</span>
         </div>
-        {client.status === 'متابعة' && (
+        {client.status !== 'نفذ' && client.status !== 'لم يتم التنفيذ' && (
           <div className="flex items-center justify-between border-t border-slate-150 pt-1">
             <span className="text-slate-400">المتابعة القادمة:</span>
             <span className={`font-sans font-bold flex items-center gap-1 ${isUrgent ? 'text-red-650 animate-pulse' : 'text-blue-600'}`}>
@@ -793,44 +781,31 @@ function ClientCard({ client, onEdit, onStatusMove, onDelete }: ClientCardProps)
       </div>
 
       {/* تحريك المراحل وتحديث الكرت */}
-      <div className="flex gap-1.5 pt-2 border-t border-slate-150">
+      <div className="flex gap-2 pt-2 border-t border-slate-150 items-center justify-between">
         <button
           onClick={() => onEdit(client)}
           className="flex-grow py-1.5 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 text-slate-600 font-bold text-[10px] rounded-lg transition flex items-center justify-center gap-1 cursor-pointer"
         >
           <PenSquare className="w-3 h-3" />
-          <span>تعديل</span>
+          <span>تفاصيل وتعديل</span>
         </button>
 
-        {/* أدوات التحكم السريع لنقل الصفقة */}
-        <div className="flex gap-1">
-          {client.status !== 'متابعة' && (
-            <button
-              onClick={() => onStatusMove(client, 'متابعة')}
-              title="إعادة للمتابعة"
-              className="p-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-100 cursor-pointer"
-            >
-              <ArrowLeftRight className="w-3 h-3" />
-            </button>
-          )}
-          {client.status !== 'نفذ' && (
-            <button
-              onClick={() => onStatusMove(client, 'نفذ')}
-              title="توقيع كصفقة ناجحة"
-              className="p-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg hover:bg-emerald-100 cursor-pointer"
-            >
-              <Check className="w-3 h-3" />
-            </button>
-          )}
-          {client.status !== 'لم يتم التنفيذ' && (
-            <button
-              onClick={() => onStatusMove(client, 'لم يتم التنفيذ')}
-              title="تسجيل كغير منفذ"
-              className="p-1.5 bg-red-50 border border-red-200 text-red-750 rounded-lg hover:bg-red-100 cursor-pointer"
-            >
-              ✕
-            </button>
-          )}
+        {/* نقل المرحلة السريعة */}
+        <div className="flex items-center">
+          <select
+            value={client.status}
+            onChange={(e) => onStatusMove(client, e.target.value as any)}
+            className="text-[10px] font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 px-2 py-1.5 rounded-lg border border-slate-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-red-500"
+            title="تحديث مرحلة الـ CRM"
+          >
+            <option value="العملاء المحتملون">1. عميل محتمل</option>
+            <option value="الفرص">2. فرصة بيع</option>
+            <option value="المؤهلون">3. مؤهل مالي</option>
+            <option value="تقديم العرض">4. تقديم عرض</option>
+            <option value="التفاوض">5. التفاوض</option>
+            <option value="نفذ">6. بيع ناجح (Won)</option>
+            <option value="لم يتم التنفيذ">7. ملغاة (Lost)</option>
+          </select>
         </div>
       </div>
 

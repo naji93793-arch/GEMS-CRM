@@ -41,7 +41,7 @@ export default function ClientForm({ user, clients, onAddClient, setActiveTab }:
   const [emirate, setEmirate] = useState('دبي');
   const [clientFeedback, setClientFeedback] = useState('');
   const [partnerFeedback, setPartnerFeedback] = useState('');
-  const [status, setStatus] = useState<'متابعة' | 'نفذ' | 'لم يتم التنفيذ'>('متابعة');
+  const [status, setStatus] = useState<'العملاء المحتملون' | 'الفرص' | 'المؤهلون' | 'تقديم العرض' | 'التفاوض' | 'نفذ' | 'لم يتم التنفيذ'>('العملاء المحتملون');
   const [nextFollowup, setNextFollowup] = useState('');
   const [interestLevel, setInterestLevel] = useState<'عالي' | 'متوسط' | 'منخفض'>('عالية');
   const [contactCount, setContactCount] = useState(1);
@@ -104,7 +104,7 @@ export default function ClientForm({ user, clients, onAddClient, setActiveTab }:
       status,
       addDate: todayStr,
       lastContact: todayStr,
-      nextFollowup: status === 'متابعة' ? nextFollowup : '',
+      nextFollowup: (status !== 'نفذ' && status !== 'لم يتم التنفيذ') ? nextFollowup : '',
       interestLevel: interestLevel as any,
       contactCount,
       notDoneReason: status === 'لم يتم التنفيذ' ? notDoneReason.trim() : undefined,
@@ -256,15 +256,19 @@ export default function ClientForm({ user, clients, onAddClient, setActiveTab }:
             </div>
 
             <div>
-              <label className="block text-slate-700 text-xs font-bold mb-1.5">حالة الصفقة الحالية *</label>
+              <label className="block text-slate-700 text-xs font-bold mb-1.5">حالة ومرحلة الصفقة الحالية *</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as any)}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white cursor-pointer"
               >
-                <option value="متابعة">متابعة نشطة (Follow-up)</option>
-                <option value="نفذ">نفذ وتم التعاقد (Won)</option>
-                <option value="لم يتم التنفيذ">لم يتم التنفيذ (Lost)</option>
+                <option value="العملاء المحتملون">1. عميل محتمل (Lead)</option>
+                <option value="الفرص">2. فرصة بيع (Opportunity)</option>
+                <option value="المؤهلون">3. مؤهل تمويلي/مالي (Qualified)</option>
+                <option value="تقديم العرض">4. تقديم عرض فني/مالي (Proposition)</option>
+                <option value="التفاوض">5. التفاوض والمراجعة (Negotiation)</option>
+                <option value="نفذ">6. نفذ وتم التعاقد (Closed Won)</option>
+                <option value="لم يتم التنفيذ">7. لم يتم التنفيذ / ملغى (Closed Lost)</option>
               </select>
             </div>
 
@@ -284,7 +288,7 @@ export default function ClientForm({ user, clients, onAddClient, setActiveTab }:
 
           {/* تواصل وتواريخ المتابعة */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {status === 'متابعة' && (
+            {status !== 'نفذ' && status !== 'لم يتم التنفيذ' && (
               <div>
                 <label className="block text-slate-700 text-xs font-bold mb-1.5">موعد المتابعة والاتصال القادمة *</label>
                 <div className="relative">
