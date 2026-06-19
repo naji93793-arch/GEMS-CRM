@@ -31,7 +31,7 @@ export default function App() {
     const storedUser = localStorage.getItem('gems_crm_user');
     const storedAdmins = localStorage.getItem('gems_crm_admin_emails')
       ? JSON.parse(localStorage.getItem('gems_crm_admin_emails')!)
-      : ['naji93793@gmail.com', 'admin@gems.com'];
+      : ['saadabugabl@gmail.com', 'naji93793@gmail.com'];
 
     if (storedUser) {
       try {

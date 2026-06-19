@@ -22,7 +22,7 @@ export default function Sidebar({ user, activeTab, setActiveTab, onLogout }: Sid
   const storedAdminsRaw = localStorage.getItem('gems_crm_admin_emails');
   const adminEmailsList: string[] = storedAdminsRaw 
     ? JSON.parse(storedAdminsRaw) 
-    : ['naji93793@gmail.com', 'admin@gems.com'];
+    : ['saadabugabl@gmail.com', 'naji93793@gmail.com'];
   
   const isAuthorizedAdmin = user.role === 'admin' || adminEmailsList.includes(user.email.toLowerCase());
 

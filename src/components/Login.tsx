@@ -52,21 +52,19 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // تهيئة حسابات المستخدمين في localStorage إذا لم تكن موجودة
+  // تهيئة حسابات المستخدمين في localStorage إذا لم تكن موجودة أو بحاجة للتحديث
   useEffect(() => {
     const storedUsers = localStorage.getItem('gems_crm_users_db');
     const storedPasses = localStorage.getItem('gems_crm_passwords_db');
     const storedAdmins = localStorage.getItem('gems_crm_admin_emails');
 
-    if (!storedUsers) {
+    // لضمان وجود حساب سعد بأحدث الصلاحيات وتفادي البيانات السابقة
+    const hasSaad = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'saadabugabl@gmail.com');
+
+    if (!storedUsers || !hasSaad) {
       localStorage.setItem('gems_crm_users_db', JSON.stringify(USERS));
-    }
-    if (!storedPasses) {
       localStorage.setItem('gems_crm_passwords_db', JSON.stringify(USER_PASSWORDS));
-    }
-    if (!storedAdmins) {
-      // البريد الافتراضي المعتمد للمشرفين
-      localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['naji93793@gmail.com', 'admin@gems.com']));
+      localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['saadabugabl@gmail.com', 'naji93793@gmail.com']));
     }
   }, []);
 
@@ -83,7 +81,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
   const getAdminsList = (): string[] => {
     const raw = localStorage.getItem('gems_crm_admin_emails');
-    return raw ? JSON.parse(raw) : ['naji93793@gmail.com', 'admin@gems.com'];
+    return raw ? JSON.parse(raw) : ['saadabugabl@gmail.com', 'naji93793@gmail.com'];
   };
 
   // معالجة تسجيل الدخول للنظام
