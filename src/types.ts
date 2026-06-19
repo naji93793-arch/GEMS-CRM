@@ -20,6 +20,7 @@ export interface Client {
   notDoneReason?: string; // سبب عدم التنفيذ
   owner: string; // المسؤول عن العميل
   ownerEmail: string; // بريد المسؤول
+  avatar?: string; // صورة العميل
 }
 
 export interface User {
@@ -27,4 +28,5 @@ export interface User {
   name: string;
   email: string;
   role: 'admin' | 'employee';
+  avatar?: string; // صورة المستخدم الشخصية
 }

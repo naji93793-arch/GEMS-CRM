@@ -37,7 +37,7 @@ export default function Sidebar({ user, activeTab, setActiveTab, onLogout, onUse
     ? JSON.parse(storedAdminsRaw) 
     : ['saadabugabl@gmail.com', 'naji93793@gmail.com'];
   
-  const isAuthorizedAdmin = user.role === 'admin' || adminEmailsList.includes(user.email.toLowerCase());
+  const isAuthorizedAdmin = user.role === 'admin';
 
   // إخفاء خيار صندوق الإدارة إذا كان حساب ناجي للإدارة مخفياً
   const menuItems = [
@@ -157,9 +157,18 @@ export default function Sidebar({ user, activeTab, setActiveTab, onLogout, onUse
         <div className="px-4 py-2 mt-4">
           <div className="p-3 bg-slate-700/50 rounded-lg border border-slate-600 space-y-2">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-slate-500 border-2 border-red-500 flex items-center justify-center text-xs font-bold text-white uppercase flex-shrink-0">
-                {user.name.substring(0, 2).toUpperCase()}
-              </div>
+              {user.avatar ? (
+                <img 
+                  src={user.avatar} 
+                  alt={user.name} 
+                  className="w-10 h-10 rounded-full object-cover border-2 border-red-500 flex-shrink-0" 
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-slate-500 border-2 border-red-500 flex items-center justify-center text-xs font-bold text-white uppercase flex-shrink-0">
+                  {user.name.substring(0, 2).toUpperCase()}
+                </div>
+              )}
               <div className="flex flex-col min-w-0 flex-grow">
                 <span className="text-sm font-medium text-white truncate">{user.name}</span>
                 <span className="text-[10px] text-slate-400 uppercase tracking-widest truncate">{user.role === 'admin' ? 'Administrator' : 'Sales Representative'}</span>

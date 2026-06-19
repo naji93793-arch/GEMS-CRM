@@ -345,9 +345,25 @@ export default function Dashboard({ user, clients }: DashboardProps) {
               const empPending = empClients.filter(c => c.status !== 'نفذ' && c.status !== 'لم يتم التنفيذ').length;
               
               return (
-                <div key={emp.email} className="bg-slate-50 p-4 border border-slate-150 rounded-xl relative overflow-hidden">
-                  <span className="block font-bold text-xs text-slate-800 truncate mb-1">{emp.name}</span>
-                  <span className="block text-[9px] text-slate-400 truncate mb-3">{emp.email}</span>
+                <div key={emp.email} className="bg-slate-50 p-4 border border-slate-150 rounded-xl relative overflow-hidden flex flex-col justify-between">
+                  <div className="flex items-center gap-2.5 mb-2">
+                    {emp.avatar ? (
+                      <img 
+                        src={emp.avatar} 
+                        alt={emp.name} 
+                        className="w-8 h-8 rounded-full object-cover border border-slate-200"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold text-[10px] border border-red-100 uppercase flex-shrink-0">
+                        {emp.name.substring(0, 2)}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <span className="block font-bold text-xs text-slate-800 truncate leading-tight">{emp.name}</span>
+                      <span className="block text-[9px] text-slate-450 truncate mt-0.5">{emp.email}</span>
+                    </div>
+                  </div>
                   
                   <div className="grid grid-cols-2 gap-2 text-center border-t border-slate-200/60 pt-2.5">
                     <div>

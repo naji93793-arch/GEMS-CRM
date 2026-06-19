@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { Client, User } from '../types';
 import { USERS } from '../mockData';
-import { UserPlus, Sparkles, Phone, MapPin, Building2, Calendar, Star, HelpCircle, Save, CheckCircle2 } from 'lucide-react';
+import { UserPlus, Sparkles, Phone, MapPin, Building2, Calendar, Star, HelpCircle, Save, CheckCircle2, Camera, X } from 'lucide-react';
 
 interface ClientFormProps {
   user: User;
@@ -43,9 +43,28 @@ export default function ClientForm({ user, clients, onAddClient, setActiveTab }:
   const [partnerFeedback, setPartnerFeedback] = useState('');
   const [status, setStatus] = useState<'العملاء المحتملون' | 'الفرص' | 'المؤهلون' | 'تقديم العرض' | 'التفاوض' | 'نفذ' | 'لم يتم التنفيذ'>('العملاء المحتملون');
   const [nextFollowup, setNextFollowup] = useState('');
-  const [interestLevel, setInterestLevel] = useState<'عالي' | 'متوسط' | 'منخفض'>('عالية');
+  const [interestLevel, setInterestLevel] = useState<'عالي' | 'متوسط' | 'منخفض'>('عالي');
   const [contactCount, setContactCount] = useState(1);
   const [notDoneReason, setNotDoneReason] = useState('');
+  const [avatar, setAvatar] = useState('');
+
+  // معالجة تغيير صورة العميل
+  const handleClientAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 1024 * 1024) {
+        alert('حجم الصورة كبير، يرجى اختيار ملف صورة أقل من 1 ميجابايت.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setAvatar(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // تفاصيل المنشئ (لو كان المسؤول العادي يتم تعليمه عليه مباشرة، لو كان آدمن يتاح اختيار موظف آخر)
   const [ownerEmail, setOwnerEmail] = useState('');
@@ -109,7 +128,8 @@ export default function ClientForm({ user, clients, onAddClient, setActiveTab }:
       contactCount,
       notDoneReason: status === 'لم يتم التنفيذ' ? notDoneReason.trim() : undefined,
       owner: ownerName,
-      ownerEmail: ownerEmail
+      ownerEmail: ownerEmail,
+      avatar: avatar || undefined
     };
 
     onAddClient(newClient);
@@ -122,6 +142,7 @@ export default function ClientForm({ user, clients, onAddClient, setActiveTab }:
     setClientFeedback('');
     setPartnerFeedback('');
     setNotDoneReason('');
+    setAvatar('');
     
     // التمرير للأعلى لرؤية نجاح العملية
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -170,6 +191,50 @@ export default function ClientForm({ user, clients, onAddClient, setActiveTab }:
         {/* جسم الفورم */}
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           
+          {/* كرت رفع لوغو أو صورة العميل */}
+          <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-col sm:flex-row items-center gap-4 justify-between">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                {avatar ? (
+                  <img 
+                    src={avatar} 
+                    alt="لوغو العميل" 
+                    className="w-16 h-16 rounded-xl object-cover border border-slate-200 shadow-sm"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-xl bg-slate-200 text-slate-400 flex items-center justify-center font-bold text-[10px] uppercase border">
+                    No Logo
+                  </div>
+                )}
+                {avatar && (
+                  <button
+                    type="button"
+                    onClick={() => setAvatar('')}
+                    className="absolute -top-1.5 -right-1.5 p-1 bg-red-650 bg-red-600 text-white rounded-full transition cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+              <div className="text-right">
+                <span className="text-xs font-black text-slate-800 block">إضافة صورة / شعار للعميل</span>
+                <span className="text-[10px] text-slate-450 block mt-0.5">ارفق شعار الشركة أو صورة ممثل الجهة لسهولة التعرف البصري باللوحة.</span>
+              </div>
+            </div>
+            
+            <label className="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 hover:text-red-700 border border-slate-250 hover:border-red-200 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer transition">
+              <Camera className="w-4 h-4 text-red-500" />
+              <span>{avatar ? 'تغيير الشعار' : 'تحميل صورة العميل'}</span>
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={handleClientAvatarChange} 
+                className="hidden" 
+              />
+            </label>
+          </div>
+
           {/* كود العميل (غير قابل للتعديل لضبط تناسق وتتابع معرف المعاملات) */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div>

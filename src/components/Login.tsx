@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { USERS, USER_PASSWORDS, AUTHORIZED_EMAILS } from '../mockData';
 import { User } from '../types';
-import { Shield, Key, UserCheck, AlertCircle, Sparkles, UserPlus, HelpCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Shield, Key, UserCheck, AlertCircle, Sparkles, UserPlus, HelpCircle, ArrowLeft, CheckCircle2, X } from 'lucide-react';
 
 interface LoginProps {
   onLoginSuccess: (user: User) => void;
@@ -43,6 +43,25 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [registerAvatar, setRegisterAvatar] = useState('');
+  
+  // معالجة تغيير الأفاتار الشخصي للموظف للتسجيل
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 1024 * 1024) {
+        setError('حجم الصورة كبير جداً، يرجى اختيار صورة أقل من 1 ميجابايت لتسريع الرفع.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setRegisterAvatar(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   
   // لنموذج النسيان وإعادة التعيين والتأكيد البريدي
   const [forgotEmail, setForgotEmail] = useState('');
@@ -175,6 +194,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       name: name.trim(),
       email: targetEmail,
       role: shouldBeAdmin ? 'admin' : 'employee',
+      avatar: registerAvatar || undefined,
     };
 
     // حفظ في قاعدة البيانات المحلية
@@ -384,6 +404,43 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                       <span>{error}</span>
                     </div>
                   )}
+
+                  {/* رفع وتحميل وادخال الصورة الشخصية لليوزر */}
+                  <div className="flex flex-col items-center justify-center p-3.5 bg-slate-50 border border-slate-200 rounded-xl gap-3">
+                    <span className="text-slate-600 text-xs font-bold w-full text-right block">الصورة الشخصية (اختياري)</span>
+                    <div className="relative group">
+                      {registerAvatar ? (
+                        <img 
+                          src={registerAvatar} 
+                          alt="صورة العضو" 
+                          referrerPolicy="no-referrer"
+                          className="w-20 h-20 rounded-full object-cover border-2 border-red-500 shadow-md" 
+                        />
+                      ) : (
+                        <div className="w-20 h-20 rounded-full bg-slate-200 flex items-center justify-center text-slate-400 font-bold text-xs border border-slate-350 shadow-xs uppercase">
+                          بدون صورة
+                        </div>
+                      )}
+                      {registerAvatar && (
+                        <button
+                          type="button"
+                          onClick={() => setRegisterAvatar('')}
+                          className="absolute -top-1 -right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full text-xs shadow-xs cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                    <label className="px-4 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-250 cursor-pointer rounded-lg text-xs font-bold transition">
+                      <span>{registerAvatar ? 'تعديل الصورة' : 'اختر صورتك الشخصية'}</span>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleAvatarChange} 
+                        className="hidden" 
+                      />
+                    </label>
+                  </div>
 
                   <div>
                     <label className="block text-slate-600 text-xs font-bold mb-1">الاسم الكامل (الثنائي أو الثلاثي)</label>

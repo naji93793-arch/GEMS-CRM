@@ -729,12 +729,26 @@ function ClientCard({ client, onEdit, onStatusMove, onDelete }: ClientCardProps)
         </div>
       </div>
 
-      {/* اسم العميل والشركة */}
-      <div>
-        <h4 className="font-extrabold text-slate-800 text-sm leading-snug">{client.name}</h4>
-        <div className="flex items-center gap-1 text-slate-400 text-xs mt-1">
-          <Building2 className="w-3.5 h-3.5" />
-          <span className="truncate">{client.company}</span>
+      {/* اسم العميل والشركة مع الصورة الشخصية للعميل */}
+      <div className="flex items-start gap-2.5">
+        {client.avatar ? (
+          <img 
+            src={client.avatar} 
+            alt={client.name} 
+            className="w-10 h-10 rounded-xl object-cover border border-slate-200 bg-slate-50 flex-shrink-0"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center font-black text-[11px] border border-red-100 uppercase flex-shrink-0">
+            {client.name.substring(0, 2)}
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <h4 className="font-extrabold text-slate-800 text-sm leading-snug truncate">{client.name}</h4>
+          <div className="flex items-center gap-1 text-slate-450 text-xs mt-0.5">
+            <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className="truncate block">{client.company}</span>
+          </div>
         </div>
       </div>
 

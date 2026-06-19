@@ -199,6 +199,9 @@ export default function App() {
       case 'reports':
         return <Reports user={currentUser} />;
       case 'admin-panel':
+        if (currentUser.role !== 'admin') {
+          return <Dashboard user={currentUser} clients={clients} />;
+        }
         return <AdminPanel user={currentUser} clients={clients} />;
       case 'team-chat':
         return <TeamChat user={currentUser} />;
