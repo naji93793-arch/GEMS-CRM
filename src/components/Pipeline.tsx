@@ -103,6 +103,16 @@ export default function Pipeline({ user, clients, onUpdateClient, onNavigateToAd
     e.preventDefault();
     if (!editingClient) return;
 
+    // التحقق من اكتمال البيانات الأساسية كأول حركة تفصيلية
+    if (!editingClient.phone || editingClient.phone.trim() === '') {
+      alert('تنبيه: يرجى كتابة رقم هاتف العميل للتواصل والمتابعة.');
+      return;
+    }
+    if (!editingClient.emirate || editingClient.emirate.trim() === '') {
+      alert('تنبيه: يرجى تحديد إمارة العميل الجغرافية لتصنيف الصفقات.');
+      return;
+    }
+
     // التحقق من الحقول
     if (editingClient.status === 'لم يتم التنفيذ' && !editingClient.notDoneReason?.trim()) {
       alert('الرجاء تعبئة سبب عدم التنفيذ للشفافية وتحديث التقارير.');
@@ -115,6 +125,13 @@ export default function Pipeline({ user, clients, onUpdateClient, onNavigateToAd
 
   // نقل سريع للعميل بين المراحل مباشرة من شاشة الكرت
   const handleQuickStatusMove = (client: Client, newStatus: 'العملاء المحتملون' | 'الفرص' | 'المؤهلون' | 'تقديم العرض' | 'التفاوض' | 'نفذ' | 'لم يتم التنفيذ') => {
+    // التحقق من استكمال البيانات المسبقة كأول حركة نقل
+    if (!client.phone || client.phone.trim() === '' || !client.emirate || client.emirate.trim() === '') {
+      alert('تنبيه: يتوجب عليك استكمال بيانات هذا العميل أولاً (رقم الهاتف، الإمارة، وملاحظات المتابعة القادمة) لإتمام أول حركة نقل وتحديث حالته بنجاح!');
+      handleOpenEdit(client);
+      return;
+    }
+
     const updated = { ...client, status: newStatus };
     if (newStatus === 'لم يتم التنفيذ') {
       // إجبار إعطاء سبب بفتحه في نافذة التعديل التفصيلية لضمان عدم وجود Placeholders مجهولة
@@ -198,8 +215,9 @@ export default function Pipeline({ user, clients, onUpdateClient, onNavigateToAd
               ))}
             </select>
           ) : (
-            <div className="bg-slate-100 border border-slate-200 text-xs text-slate-500 rounded-xl px-3 py-2.5 font-medium text-center truncate">
-              المسؤول: {user.name} (قيد الأمان والـ RLS)
+            <div className="bg-slate-100 border border-slate-200 text-xs text-slate-550 rounded-xl px-3 py-2.5 font-bold text-center truncate flex items-center justify-center gap-1.5">
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+              <span>نظام حماية البيانات والخصوصية RLS نشط</span>
             </div>
           )}
 
@@ -315,6 +333,13 @@ export default function Pipeline({ user, clients, onUpdateClient, onNavigateToAd
             {/* النموذج الداخلي */}
             <form onSubmit={handleSaveEdit} className="p-6 space-y-4 flex-grow">
               
+              {(!editingClient.phone || editingClient.phone.trim() === '' || !editingClient.emirate || editingClient.emirate.trim() === '') && (
+                <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3.5 text-xs font-bold leading-relaxed flex items-center gap-2">
+                  <span className="text-base bounce-animation">⚠️</span>
+                  <span>تنبيه: هذا العميل يحتاج لاستكمال البيانات التفصيلية (رقم الهاتف، إمارة العميل، وتواريخ المتابعة) لإتمام أول حركة ومتابعة حالته بنجاح!</span>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-slate-600 text-[11px] font-bold mb-1">اسم العميل بالكامل</label>
@@ -800,10 +825,6 @@ function ClientCard({ client, onEdit, onStatusMove, onDelete }: ClientCardProps)
         )}
       </div>
 
-      {/* سطر الموظف المسؤول للشفافية ومتابعة الأعمال */}
-      <div className="flex justify-between items-center text-[9px] text-slate-500">
-        <span>المسؤول: <strong>{client.owner}</strong></span>
-      </div>
 
       {/* تحريك المراحل وتحديث الكرت */}
       <div className="flex gap-2 pt-2 border-t border-slate-150 items-center justify-between">

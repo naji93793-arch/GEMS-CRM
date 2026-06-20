@@ -37,6 +37,7 @@ export default function ClientForm({ user, clients, onAddClient, setActiveTab }:
   const [clientId, setClientId] = useState('');
   const [name, setName] = useState('');
   const [company, setCompany] = useState('');
+  const [showExtraDetails, setShowExtraDetails] = useState(false);
   const [phone, setPhone] = useState('');
   const [emirate, setEmirate] = useState('دبي');
   const [clientFeedback, setClientFeedback] = useState('');
@@ -107,7 +108,7 @@ export default function ClientForm({ user, clients, onAddClient, setActiveTab }:
     const todayStr = new Date().toISOString().split('T')[0];
 
     // التحقق من سبب عدم التنفيذ
-    if (status === 'لم يتم التنفيذ' && !notDoneReason.trim()) {
+    if (showExtraDetails && status === 'لم يتم التنفيذ' && !notDoneReason.trim()) {
       alert('يرجى كتابة سبب عدم التنفيذ للتوثيق الإداري.');
       return;
     }
@@ -116,17 +117,17 @@ export default function ClientForm({ user, clients, onAddClient, setActiveTab }:
       id: clientId,
       name: name.trim(),
       company: company.trim(),
-      phone: phone.trim(),
-      emirate,
-      clientFeedback: clientFeedback.trim(),
-      partnerFeedback: partnerFeedback.trim(),
-      status,
+      phone: showExtraDetails ? phone.trim() : '',
+      emirate: showExtraDetails ? emirate : '',
+      clientFeedback: showExtraDetails ? clientFeedback.trim() : 'قيد استكمال البيانات الموظف المتابع...',
+      partnerFeedback: showExtraDetails ? partnerFeedback.trim() : 'جاري الاتصال الأول واستكمال رقم الهاتف وبقية البيانات التوجيهية للخدمة...',
+      status: showExtraDetails ? status : 'العملاء المحتملون',
       addDate: todayStr,
       lastContact: todayStr,
-      nextFollowup: (status !== 'نفذ' && status !== 'لم يتم التنفيذ') ? nextFollowup : '',
-      interestLevel: interestLevel as any,
-      contactCount,
-      notDoneReason: status === 'لم يتم التنفيذ' ? notDoneReason.trim() : undefined,
+      nextFollowup: showExtraDetails ? ((status !== 'نفذ' && status !== 'لم يتم التنفيذ') ? nextFollowup : '') : '',
+      interestLevel: showExtraDetails ? (interestLevel as any) : 'عالي',
+      contactCount: showExtraDetails ? contactCount : 0,
+      notDoneReason: (showExtraDetails && status === 'لم يتم التنفيذ') ? notDoneReason.trim() : undefined,
       owner: ownerName,
       ownerEmail: ownerEmail,
       avatar: avatar || undefined
@@ -143,6 +144,7 @@ export default function ClientForm({ user, clients, onAddClient, setActiveTab }:
     setPartnerFeedback('');
     setNotDoneReason('');
     setAvatar('');
+    setShowExtraDetails(false);
     
     // التمرير للأعلى لرؤية نجاح العملية
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -280,146 +282,163 @@ export default function ClientForm({ user, clients, onAddClient, setActiveTab }:
             </div>
           </div>
 
-          <hr className="border-slate-100" />
+          {/* خيار لتعبئة البيانات الإضافية فوراً */}
+          <div className="flex justify-start items-center bg-slate-50 border border-slate-150 p-3.5 rounded-xl">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input 
+                type="checkbox" 
+                checked={showExtraDetails}
+                onChange={(e) => setShowExtraDetails(e.target.checked)}
+                className="w-4 h-4 text-red-600 border-slate-300 rounded focus:ring-red-555 cursor-pointer"
+              />
+              <span className="text-xs font-black text-slate-800">ترغب في ملء كامل بيانات المتابعة والتواصل الآن؟ (رقم هاتف، إمارة، نوع المتابعة والاتصال) [اختياري ويتم طلبها لاحقاً عند أول حركة]</span>
+            </label>
+          </div>
 
-          {/* معلومات التواصل والموقع والاستهداف */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div>
-              <label className="block text-slate-700 text-xs font-bold mb-1.5">رقم تليفون التواصل *</label>
-              <div className="relative">
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="مثال: +971 50 123 4567"
-                  className="w-full text-right px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white ltr-input"
-                  required
-                />
-                <div className="absolute left-3 top-3.5 text-slate-450">
-                  <Phone className="w-4 h-4" />
+          {showExtraDetails && (
+            <>
+              <hr className="border-slate-100" />
+
+              {/* معلومات التواصل والموقع والاستهداف */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div>
+                  <label className="block text-slate-700 text-xs font-bold mb-1.5">رقم تليفون التواصل *</label>
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="مثال: +971 50 123 4567"
+                      className="w-full text-right px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white ltr-input"
+                      required={showExtraDetails}
+                    />
+                    <div className="absolute left-3 top-3.5 text-slate-455">
+                      <Phone className="w-4 h-4" />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 text-xs font-bold mb-1.5">إمارة العميل *</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      list="emirates-suggestions"
+                      value={emirate}
+                      onChange={(e) => setEmirate(e.target.value)}
+                      placeholder="اكتب الإمارة أو اختر من القائمة..."
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white"
+                      required={showExtraDetails}
+                    />
+                    <datalist id="emirates-suggestions">
+                      <option value="دبي" />
+                      <option value="أبوظبي" />
+                      <option value="الشارقة" />
+                      <option value="عجمان" />
+                      <option value="رأس الخيمة" />
+                      <option value="الفجيرة" />
+                      <option value="أم القيوين" />
+                    </datalist>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 text-xs font-bold mb-1.5">حالة ومرحلة الصفقة الحالية *</label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as any)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white cursor-pointer"
+                  >
+                    <option value="العملاء المحتملون">1. عميل محتمل (Lead)</option>
+                    <option value="الفرص">2. فرصة بيع (Opportunity)</option>
+                    <option value="المؤهلون">3. مؤهل تمويلي/مالي (Qualified)</option>
+                    <option value="تقديم العرض">4. تقديم عرض فني/مالي (Proposition)</option>
+                    <option value="التفاوض">5. التفاوض والمراجعة (Negotiation)</option>
+                    <option value="نفذ">6. نفذ وتم التعاقد (Closed Won)</option>
+                    <option value="لم يتم التنفيذ">7. لم يتم التنفيذ / ملغى (Closed Lost)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 text-xs font-bold mb-1.5">درجة اهتمام وجدّية العميل *</label>
+                  <select
+                    value={interestLevel}
+                    onChange={(e) => setInterestLevel(e.target.value as any)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white cursor-pointer"
+                  >
+                    <option value="عالي">اهتمام عالي (فرصة ساخنة)</option>
+                    <option value="متوسط">اهتمام متوسط (مستهلك محتمل)</option>
+                    <option value="منخفض">اهتمام منخفض (معاينة بعيدة)</option>
+                  </select>
                 </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-slate-700 text-xs font-bold mb-1.5">إمارة العميل *</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  list="emirates-suggestions"
-                  value={emirate}
-                  onChange={(e) => setEmirate(e.target.value)}
-                  placeholder="اكتب الإمارة أو اختر من القائمة..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white"
-                  required
-                />
-                <datalist id="emirates-suggestions">
-                  <option value="دبي" />
-                  <option value="أبوظبي" />
-                  <option value="الشارقة" />
-                  <option value="عجمان" />
-                  <option value="رأس الخيمة" />
-                  <option value="الفجيرة" />
-                  <option value="أم القيوين" />
-                </datalist>
+              {/* تواصل وتواريخ المتابعة */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {status !== 'نفذ' && status !== 'لم يتم التنفيذ' && (
+                  <div>
+                    <label className="block text-slate-700 text-xs font-bold mb-1.5">موعد المتابعة والاتصال القادمة *</label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={nextFollowup}
+                        onChange={(e) => setNextFollowup(e.target.value)}
+                        className="w-full text-right px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500"
+                        required={showExtraDetails && status !== 'نفذ' && status !== 'لم يتم التنفيذ'}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {status === 'لم يتم التنفيذ' && (
+                  <div className="md:col-span-2">
+                    <label className="block text-red-650 text-xs font-bold mb-1.5 flex items-center gap-1">
+                      <span>سبب عدم التنفيذ والغلق المالي *</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={notDoneReason}
+                      onChange={(e) => setNotDoneReason(e.target.value)}
+                      placeholder="اكتب بوضوح: الميزانية لا تسمح، عدم الرد والانسحاب، الخيار للمنافس..."
+                      className="w-full text-right px-4 py-2.5 bg-red-50/40 border border-red-200 rounded-xl text-xs font-bold text-red-950 focus:outline-none focus:ring-2 focus:ring-red-500"
+                      required={showExtraDetails && status === 'لم يتم التنفيذ'}
+                    />
+                  </div>
+                )}
               </div>
-            </div>
 
-            <div>
-              <label className="block text-slate-700 text-xs font-bold mb-1.5">حالة ومرحلة الصفقة الحالية *</label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as any)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white cursor-pointer"
-              >
-                <option value="العملاء المحتملون">1. عميل محتمل (Lead)</option>
-                <option value="الفرص">2. فرصة بيع (Opportunity)</option>
-                <option value="المؤهلون">3. مؤهل تمويلي/مالي (Qualified)</option>
-                <option value="تقديم العرض">4. تقديم عرض فني/مالي (Proposition)</option>
-                <option value="التفاوض">5. التفاوض والمراجعة (Negotiation)</option>
-                <option value="نفذ">6. نفذ وتم التعاقد (Closed Won)</option>
-                <option value="لم يتم التنفيذ">7. لم يتم التنفيذ / ملغى (Closed Lost)</option>
-              </select>
-            </div>
+              <hr className="border-slate-100" />
 
-            <div>
-              <label className="block text-slate-700 text-xs font-bold mb-1.5">درجة اهتمام وجدّية العميل *</label>
-              <select
-                value={interestLevel}
-                onChange={(e) => setInterestLevel(e.target.value as any)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white cursor-pointer"
-              >
-                <option value="عالي">اهتمام عالي (فرصة ساخنة)</option>
-                <option value="متوسط">اهتمام متوسط (مستهلك محتمل)</option>
-                <option value="منخفض">اهتمام منخفض (معاينة بعيدة)</option>
-              </select>
-            </div>
-          </div>
+              {/* إفادات العميل والزميل مبيعات */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-slate-700 text-xs font-bold mb-1.5">إفادة العميل المباشرة والتعليق (Client Feedback) *</label>
+                  <textarea
+                    rows={3}
+                    value={clientFeedback}
+                    onChange={(e) => setClientFeedback(e.target.value)}
+                    placeholder="اكتب هنا تفاصيل رد العميل في آخر مكالمة وصوته وما يرغب به..."
+                    className="w-full text-right px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white"
+                    required={showExtraDetails}
+                  ></textarea>
+                </div>
 
-          {/* تواصل وتواريخ المتابعة */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {status !== 'نفذ' && status !== 'لم يتم التنفيذ' && (
-              <div>
-                <label className="block text-slate-700 text-xs font-bold mb-1.5">موعد المتابعة والاتصال القادمة *</label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    value={nextFollowup}
-                    onChange={(e) => setNextFollowup(e.target.value)}
-                    className="w-full text-right px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500"
-                    required
-                  />
+                <div>
+                  <label className="block text-slate-700 text-xs font-bold mb-1.5">إفادة الشريك والإجراء المتخذ (Partner Feedback) *</label>
+                  <textarea
+                    rows={3}
+                    value={partnerFeedback}
+                    onChange={(e) => setPartnerFeedback(e.target.value)}
+                    placeholder="ما هو الإجراء الذي باشرته للتخديم عليه؟ هل أرسلت العرض المالي أم مصفوفة الخدمات؟"
+                    className="w-full text-right px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white"
+                    required={showExtraDetails}
+                  ></textarea>
                 </div>
               </div>
-            )}
 
-            {status === 'لم يتم التنفيذ' && (
-              <div className="md:col-span-2">
-                <label className="block text-red-650 text-xs font-bold mb-1.5 flex items-center gap-1">
-                  <span>سبب عدم التنفيذ والغلق المالي *</span>
-                </label>
-                <input
-                  type="text"
-                  value={notDoneReason}
-                  onChange={(e) => setNotDoneReason(e.target.value)}
-                  placeholder="اكتب بوضوح: الميزانية لا تسمح، عدم الرد والانسحاب، الخيار للمنافس..."
-                  className="w-full text-right px-4 py-2.5 bg-red-50/40 border border-red-200 rounded-xl text-xs font-bold text-red-950 focus:outline-none focus:ring-2 focus:ring-red-500"
-                  required
-                />
-              </div>
-            )}
-          </div>
-
-          <hr className="border-slate-100" />
-
-          {/* إفادات العميل والزميل مبيعات */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-slate-700 text-xs font-bold mb-1.5">إفادة العميل المباشرة والتعليق (Client Feedback) *</label>
-              <textarea
-                rows={3}
-                value={clientFeedback}
-                onChange={(e) => setClientFeedback(e.target.value)}
-                placeholder="اكتب هنا تفاصيل رد العميل في آخر مكالمة وصوته وما يرغب به..."
-                className="w-full text-right px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white"
-                required
-              ></textarea>
-            </div>
-
-            <div>
-              <label className="block text-slate-700 text-xs font-bold mb-1.5">إفادة الشريك والإجراء المتخذ (Partner Feedback) *</label>
-              <textarea
-                rows={3}
-                value={partnerFeedback}
-                onChange={(e) => setPartnerFeedback(e.target.value)}
-                placeholder="ما هو الإجراء الذي باشرته للتخديم عليه؟ هل أرسلت العرض المالي أم مصفوفة الخدمات؟"
-                className="w-full text-right px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white"
-                required
-              ></textarea>
-            </div>
-          </div>
-
-          <hr className="border-slate-100" />
+              <hr className="border-slate-100" />
+            </>
+          )}
 
           {/* تحديد معلومات المسؤول عن العميل (Row-Level Security) */}
           <div className="bg-slate-50 p-5 rounded-xl border border-gray-200 shadow-sm">
