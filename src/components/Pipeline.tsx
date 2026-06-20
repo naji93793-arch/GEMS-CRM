@@ -51,7 +51,12 @@ export default function Pipeline({ user, clients, onUpdateClient, onNavigateToAd
         client.phone.includes(searchTerm);
 
       // 3. فلتر الإمارة
-      const matchesEmirate = selectedEmirate === 'all' || client.emirate === selectedEmirate;
+      const normalizedSel = selectedEmirate.trim().toLowerCase();
+      const matchesEmirate = 
+        normalizedSel === 'all' || 
+        normalizedSel === '' || 
+        normalizedSel === 'الكل' || 
+        (client.emirate && client.emirate.toLowerCase().includes(normalizedSel));
 
       // 4. فلتر درجة الاهتمام
       const matchesInterest = selectedInterest === 'all' || client.interestLevel === selectedInterest;
@@ -179,16 +184,29 @@ export default function Pipeline({ user, clients, onUpdateClient, onNavigateToAd
           </div>
 
           {/* تصفية حسب الإمارة */}
-          <select
-            value={selectedEmirate}
-            onChange={(e) => setSelectedEmirate(e.target.value)}
-            className="bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 text-slate-600 font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white cursor-pointer"
-          >
-            <option value="all">كل الإمارات المتاحة</option>
-            {emiratesList.map(em => (
-              <option key={em} value={em}>{em}</option>
-            ))}
-          </select>
+          <div className="relative">
+            <input
+              type="text"
+              list="filter-emirates-suggestions"
+              value={selectedEmirate === 'all' ? '' : selectedEmirate}
+              onChange={(e) => setSelectedEmirate(e.target.value || 'all')}
+              placeholder="فلترة بالإمارة (اكتب أو اختر)..."
+              className="w-full text-right px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white placeholder:text-slate-400"
+            />
+            <datalist id="filter-emirates-suggestions">
+              <option value="الكل" />
+              {emiratesList.map(em => (
+                <option key={em} value={em} />
+              ))}
+              <option value="دبي" />
+              <option value="أبوظبي" />
+              <option value="الشارقة" />
+              <option value="عجمان" />
+              <option value="رأس الخيمة" />
+              <option value="الفجيرة" />
+              <option value="أم القيوين" />
+            </datalist>
+          </div>
 
           {/* تصفية حسب المبيعات والجدية */}
           <select
