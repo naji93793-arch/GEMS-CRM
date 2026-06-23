@@ -96,7 +96,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       const storedUsers = localStorage.getItem('gems_crm_users_db');
       const hasNaji = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'naji93793@gmail.com');
       const hasAlaa = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'alaakhaledmekky61@gmail.com');
-      if (!storedUsers || !hasNaji || !hasAlaa) {
+      const hasNoha = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'nohahesham1990@gmail.com');
+      if (!storedUsers || !hasNaji || !hasAlaa || !hasNoha) {
         localStorage.setItem('gems_crm_users_db', JSON.stringify(USERS));
         localStorage.setItem('gems_crm_passwords_db', JSON.stringify(USER_PASSWORDS));
         localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['saadabugabl@gmail.com', 'naji93793@gmail.com']));
