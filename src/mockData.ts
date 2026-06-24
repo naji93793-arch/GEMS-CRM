@@ -11,6 +11,7 @@ export const USERS: User[] = [
   { username: 'naji_gems', name: 'ناجي بن محمد (الإدارة)', email: 'naji93793@gmail.com', role: 'admin' },
   { username: 'naji_sales', name: 'ناجي بن محمد (مبيعات)', email: 'naji93793@gmail.com', role: 'employee' },
   { username: 'noha_sales', name: 'نهى هشام', email: 'nohahesham1990@gmail.com', role: 'employee' },
+  { username: 'ebied_sales', name: 'عبيد عياد', email: 'ebiedayad1@gmail.com', role: 'employee' },
   { username: 'meera_sales', name: 'ميرا السنفوري', email: 'meeraelasanhory@icloud.com', role: 'employee' },
   { username: 'alaa_sales', name: 'آلاء خالد مكي', email: 'alaakhaledmekky61@gmail.com', role: 'employee' }
 ];
@@ -24,6 +25,8 @@ export const USER_PASSWORDS: Record<string, string> = {
   'naji93793@gmail.com': '11223344',
   'noha_sales': '11223344',
   'nohahesham1990@gmail.com': '11223344',
+  'ebied_sales': 'ahmed aiad',
+  'ebiedayad1@gmail.com': 'ahmed aiad',
   'admin': '11223344',
   'meera_sales': '12341234',
   'meeraelasanhory@icloud.com': '12341234',
