@@ -31,7 +31,7 @@ export default function AdminPanel({ user, clients }: AdminPanelProps) {
     if (storedAdmins) {
       setAdminEmails(JSON.parse(storedAdmins));
     } else {
-      const defaults = ['saadabugabl@gmail.com', 'naji93793@gmail.com'];
+      const defaults = ['saadabugabl@gmail.com', 'naji93793@gmail.com', 'eng.abdelrahman1137@gmail.com'];
       setAdminEmails(defaults);
       localStorage.setItem('gems_crm_admin_emails', JSON.stringify(defaults));
     }

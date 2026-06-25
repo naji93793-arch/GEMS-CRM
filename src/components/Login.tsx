@@ -87,7 +87,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       // تعيين الحسابات وقوائم الأمن للبداية الجديدة مع الحسابات المحدثة
       localStorage.setItem('gems_crm_users_db', JSON.stringify(USERS));
       localStorage.setItem('gems_crm_passwords_db', JSON.stringify(USER_PASSWORDS));
-      localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['saadabugabl@gmail.com', 'naji93793@gmail.com']));
+      localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['saadabugabl@gmail.com', 'naji93793@gmail.com', 'eng.abdelrahman1137@gmail.com']));
       
       // تأكيد حفظ علامة الترقية والتعديل
       localStorage.setItem('gems_crm_clean_v4_resetted', 'true');
@@ -98,10 +98,11 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       const hasAlaa = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'alaakhaledmekky61@gmail.com');
       const hasNoha = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'nohahesham1990@gmail.com');
       const hasEbied = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'ebiedayad1@gmail.com');
-      if (!storedUsers || !hasNaji || !hasAlaa || !hasNoha || !hasEbied) {
+      const hasAbdelrahman = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'eng.abdelrahman1137@gmail.com');
+      if (!storedUsers || !hasNaji || !hasAlaa || !hasNoha || !hasEbied || !hasAbdelrahman) {
         localStorage.setItem('gems_crm_users_db', JSON.stringify(USERS));
         localStorage.setItem('gems_crm_passwords_db', JSON.stringify(USER_PASSWORDS));
-        localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['saadabugabl@gmail.com', 'naji93793@gmail.com']));
+        localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['saadabugabl@gmail.com', 'naji93793@gmail.com', 'eng.abdelrahman1137@gmail.com']));
       }
     }
   }, []);
