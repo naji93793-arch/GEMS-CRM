@@ -36,7 +36,7 @@ const AVATAR_COLORS: Record<string, string> = {
   'meeraelasanhory@icloud.com': 'bg-purple-650 bg-purple-600',
   'rehamhesham995@gmail.com': 'bg-pink-650 bg-pink-600',
   'ebiedayad1@gmail.com': 'bg-blue-650 bg-blue-600',
-  'naji93793@gmail.com': 'bg-indigo-650 bg-indigo-600',
+  'eng.abdelrahman1137@gmail.com': 'bg-indigo-650 bg-indigo-600',
 };
 
 const getAvatarColor = (email: string) => {
@@ -212,18 +212,11 @@ export default function TeamChat({ user }: TeamChatProps) {
     setMessages(updated);
   };
 
-  // جلب كافة الموظفين المتواجدين (من localStorage مع إخفاء ناجي التام عن أي واجهة لغير ناجي)
+  // جلب كافة الموظفين المتواجدين (من localStorage)
   const getOnlineTeammates = () => {
     const rawUsers = localStorage.getItem('gems_crm_users_db');
     const dbUsers: User[] = rawUsers ? JSON.parse(rawUsers) : [];
-    
-    const isNajiLogged = user.email.toLowerCase() === 'naji93793@gmail.com';
-    
-    // تصفية ناجي من القائمة تماماً لغير ناجي، وجعل حساب سعد هو البارز كإدارة وحيد للجميع
-    return dbUsers.filter(u => {
-      const isNajiAcc = u.username === 'naji_gems' || u.username === 'naji_sales' || u.email.toLowerCase() === 'naji93793@gmail.com';
-      return !isNajiAcc || isNajiLogged;
-    });
+    return dbUsers;
   };
 
   // تصفية الرسائل النشطة بناء على البحث وفلاتر العرض المتعددة
@@ -247,9 +240,9 @@ export default function TeamChat({ user }: TeamChatProps) {
     return true;
   });
 
-  const isNajiActive = user.email.toLowerCase() === 'naji93793@gmail.com';
+  const isAbdelrahmanActive = user.email.toLowerCase() === 'eng.abdelrahman1137@gmail.com';
   const isSaadActive = user.email.toLowerCase() === 'saadabugabl@gmail.com';
-  const canClearAll = isSaadActive || isNajiActive;
+  const canClearAll = isSaadActive || isAbdelrahmanActive;
 
   return (
     <div className="space-y-6 font-sans pb-8 text-right" dir="rtl">
@@ -379,11 +372,9 @@ export default function TeamChat({ user }: TeamChatProps) {
                 const isMe = msg.senderEmail.toLowerCase() === user.email.toLowerCase();
                 const hasLiked = msg.likes.includes(user.email);
                 
-                // إخفاء ناجي التام عن المبيعات
-                const isNajiAcc = msg.senderUsername === 'naji_gems' || msg.senderEmail.toLowerCase() === 'naji93793@gmail.com';
-                const displayName = (!isNajiActive && isNajiAcc) ? 'مشرف إدارة GEMS' : msg.senderName;
-                const displayRole = (!isNajiActive && isNajiAcc) ? 'admin' : msg.senderRole;
-                const displayAvatarEmail = (!isNajiActive && isNajiAcc) ? 'saadabugabl@gmail.com' : msg.senderEmail;
+                const displayName = msg.senderName;
+                const displayRole = msg.senderRole;
+                const displayAvatarEmail = msg.senderEmail;
 
                 // هل الرسالة موجهة؟
                 const isTargetedToMe = msg.recipientEmail && msg.recipientEmail.toLowerCase() === user.email.toLowerCase();

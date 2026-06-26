@@ -36,7 +36,7 @@ export default function Sidebar({ user, activeTab, setActiveTab, onLogout, onUse
   const storedAdminsRaw = localStorage.getItem('gems_crm_admin_emails');
   const adminEmailsList: string[] = storedAdminsRaw 
     ? JSON.parse(storedAdminsRaw) 
-    : ['saadabugabl@gmail.com', 'naji93793@gmail.com', 'eng.abdelrahman1137@gmail.com'];
+    : ['saadabugabl@gmail.com', 'eng.abdelrahman1137@gmail.com'];
   
   const isAuthorizedAdmin = user.role === 'admin';
 
@@ -214,8 +214,8 @@ export default function Sidebar({ user, activeTab, setActiveTab, onLogout, onUse
           <span>Sign Out خروج</span>
         </button>
         <div className="text-center text-[10px] text-slate-400 border-t border-slate-800/60 pt-3">
-          <span>تم التطوير بواسطة </span>
-          <strong className="text-red-500 font-black block text-xs mt-0.5 tracking-wide">mohamed atef naji</strong>
+          <span>تحت إشراف وتطوير </span>
+          <strong className="text-red-500 font-black block text-xs mt-0.5 tracking-wide">م. عبد الرحمن (الإدارة)</strong>
         </div>
       </div>
     </div>

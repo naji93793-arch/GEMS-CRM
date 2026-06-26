@@ -31,7 +31,7 @@ export default function AdminPanel({ user, clients }: AdminPanelProps) {
     if (storedAdmins) {
       setAdminEmails(JSON.parse(storedAdmins));
     } else {
-      const defaults = ['saadabugabl@gmail.com', 'naji93793@gmail.com', 'eng.abdelrahman1137@gmail.com'];
+      const defaults = ['saadabugabl@gmail.com', 'eng.abdelrahman1137@gmail.com'];
       setAdminEmails(defaults);
       localStorage.setItem('gems_crm_admin_emails', JSON.stringify(defaults));
     }
@@ -99,6 +99,12 @@ export default function AdminPanel({ user, clients }: AdminPanelProps) {
     // منع المشرف من إزالة نفسه لتجنب الوقوع خارج النظام
     if (emailLower === user.email.toLowerCase()) {
       triggerNotification('error', 'لا يمكنك إزالة بريدك الإلكتروني الخاص من الصلاحيات وأنت متصل حالياً بقشرة الإدارة.');
+      return;
+    }
+
+    // منع إزالة المدير العام والمالك الفعلي للنظام م. عبد الرحمن
+    if (emailLower === 'eng.abdelrahman1137@gmail.com') {
+      triggerNotification('error', 'غير مسموح إطلاقاً بسحب الصلاحية من المدير العام والمالك الفعلي للنظام (م. عبد الرحمن).');
       return;
     }
 
@@ -219,11 +225,7 @@ export default function AdminPanel({ user, clients }: AdminPanelProps) {
                 </thead>
                 <tbody className="text-xs divide-y divide-slate-100">
                   {(() => {
-                    const isNajiCurrentUser = user.email.toLowerCase() === 'naji93793@gmail.com' || user.username.toLowerCase().includes('naji');
-                    const filteredList = registeredUsers.filter(usr => {
-                      const isNajiAcc = usr.email.toLowerCase() === 'naji93793@gmail.com' || usr.username.toLowerCase().includes('naji');
-                      return isNajiCurrentUser || !isNajiAcc;
-                    });
+                    const filteredList = registeredUsers;
                     if (filteredList.length === 0) {
                       return (
                         <tr>
@@ -372,9 +374,7 @@ export default function AdminPanel({ user, clients }: AdminPanelProps) {
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">المدراء الفعليين حالياً:</span>
               <div className="space-y-1.5">
                 {(() => {
-                  const isNajiCurrentUser = user.email.toLowerCase() === 'naji93793@gmail.com' || user.username.toLowerCase().includes('naji');
                   return adminEmails
-                    .filter(email => email.toLowerCase() !== 'naji93793@gmail.com' || isNajiCurrentUser)
                     .map((email) => (
                       <div 
                         key={email} 

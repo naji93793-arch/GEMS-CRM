@@ -8,9 +8,7 @@ import { Client, User } from './types';
 /// حسابات المشرفين والمدراء المعتمدين للنظام
 export const USERS: User[] = [
   { username: 'saad_gems', name: 'سعد أبو جبل', email: 'saadabugabl@gmail.com', role: 'admin' },
-  { username: 'naji_gems', name: 'ناجي بن محمد (الإدارة)', email: 'naji93793@gmail.com', role: 'admin' },
   { username: 'abdelrahman_admin', name: 'م. عبد الرحمن (الإدارة)', email: 'eng.abdelrahman1137@gmail.com', role: 'admin' },
-  { username: 'naji_sales', name: 'ناجي بن محمد (مبيعات)', email: 'naji93793@gmail.com', role: 'employee' },
   { username: 'noha_sales', name: 'نهى هشام', email: 'nohahesham1990@gmail.com', role: 'employee' },
   { username: 'ebied_sales', name: 'عبيد عياد', email: 'ebiedayad1@gmail.com', role: 'employee' },
   { username: 'meera_sales', name: 'ميرا السنفوري', email: 'meeraelasanhory@icloud.com', role: 'employee' },
@@ -20,10 +18,7 @@ export const USERS: User[] = [
 // كلمات المرور الافتراضية المؤمنة لليوزرز الأساسيين
 export const USER_PASSWORDS: Record<string, string> = {
   'saad_gems': '11223344',
-  'naji_gems': '11223344',
-  'naji_sales': '11223344',
   'saadabugabl@gmail.com': '11223344',
-  'naji93793@gmail.com': '11223344',
   'abdelrahman_admin': '11223344',
   'eng.abdelrahman1137@gmail.com': '11223344',
   'noha_sales': '11223344',
@@ -40,7 +35,6 @@ export const USER_PASSWORDS: Record<string, string> = {
 // قائمة إيميلات الموظفين والمسؤولين المعتمدين والمسموح لهم بالتسجيل وإنشاء كلمة المرور
 export const AUTHORIZED_EMAILS = [
   'saadabugabl@gmail.com',
-  'naji93793@gmail.com',
   'eng.abdelrahman1137@gmail.com',
   'nohahesham1990@gmail.com',
   'meeraelasanhory@icloud.com',

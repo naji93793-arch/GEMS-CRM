@@ -77,32 +77,31 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
   // تهيئة حسابات المستخدمين في localStorage وإتاحة بداية نظيفة مع إدماج الحسابات المطلوبة
   useEffect(() => {
-    const isCleanReset = localStorage.getItem('gems_crm_clean_v4_resetted');
+    const isCleanReset = localStorage.getItem('gems_crm_clean_v5_resetted');
 
     if (!isCleanReset) {
       // المحافظة الاحتياطية والدائمة على سجل العملاء المدخلين مسبقاً لمنع أي حذف
       const existingClients = localStorage.getItem('gems_crm_clients') || '[]';
       localStorage.setItem('gems_crm_clients', existingClients);
       
-      // تعيين الحسابات وقوائم الأمن للبداية الجديدة مع الحسابات المحدثة
+      // تعيين الحسابات وقوائم الأمن للبداية الجديدة مع الحسابات المحدثة بدون ناجي
       localStorage.setItem('gems_crm_users_db', JSON.stringify(USERS));
       localStorage.setItem('gems_crm_passwords_db', JSON.stringify(USER_PASSWORDS));
-      localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['saadabugabl@gmail.com', 'naji93793@gmail.com', 'eng.abdelrahman1137@gmail.com']));
+      localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['saadabugabl@gmail.com', 'eng.abdelrahman1137@gmail.com']));
       
       // تأكيد حفظ علامة الترقية والتعديل
-      localStorage.setItem('gems_crm_clean_v4_resetted', 'true');
+      localStorage.setItem('gems_crm_clean_v5_resetted', 'true');
     } else {
       // فحص أمان احتياطي للتأكد من المزامنة المستمرة لحسابات الدخول ومسح القديم
       const storedUsers = localStorage.getItem('gems_crm_users_db');
-      const hasNaji = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'naji93793@gmail.com');
       const hasAlaa = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'alaakhaledmekky61@gmail.com');
       const hasNoha = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'nohahesham1990@gmail.com');
       const hasEbied = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'ebiedayad1@gmail.com');
       const hasAbdelrahman = storedUsers && JSON.parse(storedUsers).some((u: any) => u.email.toLowerCase() === 'eng.abdelrahman1137@gmail.com');
-      if (!storedUsers || !hasNaji || !hasAlaa || !hasNoha || !hasEbied || !hasAbdelrahman) {
+      if (!storedUsers || !hasAlaa || !hasNoha || !hasEbied || !hasAbdelrahman) {
         localStorage.setItem('gems_crm_users_db', JSON.stringify(USERS));
         localStorage.setItem('gems_crm_passwords_db', JSON.stringify(USER_PASSWORDS));
-        localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['saadabugabl@gmail.com', 'naji93793@gmail.com', 'eng.abdelrahman1137@gmail.com']));
+        localStorage.setItem('gems_crm_admin_emails', JSON.stringify(['saadabugabl@gmail.com', 'eng.abdelrahman1137@gmail.com']));
       }
     }
   }, []);
@@ -120,7 +119,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
   const getAdminsList = (): string[] => {
     const raw = localStorage.getItem('gems_crm_admin_emails');
-    return raw ? JSON.parse(raw) : ['saadabugabl@gmail.com', 'naji93793@gmail.com'];
+    return raw ? JSON.parse(raw) : ['saadabugabl@gmail.com', 'eng.abdelrahman1137@gmail.com'];
   };
 
   // معالجة تسجيل الدخول للنظام
@@ -190,8 +189,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
     // تحديد الصلاحية تلقائياً: إذا كان الإيميل ضمن مصفوفة المشرفين المعتمدة
     const isTargetAdmin = admins.includes(targetEmail);
-    // إذا كان بريد ناجي وهو لتسجيل حساب المبيعات الثاني (اليوزر) نمنعه من كونه مدير فيه ليبقى حساب الإدارة مخفياً
-    const shouldBeAdmin = isTargetAdmin && targetEmail === 'naji93793@gmail.com' ? false : isTargetAdmin;
+    const shouldBeAdmin = isTargetAdmin;
     const newUsername = targetEmail.split('@')[0] + "_" + Math.floor(Math.random() * 100);
 
     const newUser: User = {
@@ -341,7 +339,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                         type="text"
                         value={emailOrUsername}
                         onChange={(e) => setEmailOrUsername(e.target.value)}
-                        placeholder="naji93793@gmail.com أو admin"
+                        placeholder="eng.abdelrahman1137@gmail.com أو admin"
                         className="w-full text-right px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white text-slate-800 text-xs"
                         required
                       />
@@ -453,7 +451,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="مثال: ناجي بن محمد"
+                      placeholder="مثال: م. عبد الرحمن"
                       className="w-full text-right px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white text-slate-800 text-xs"
                       required
                     />
@@ -465,7 +463,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                       type="email"
                       value={emailOrUsername}
                       onChange={(e) => setEmailOrUsername(e.target.value)}
-                      placeholder="naji93793@gmail.com"
+                      placeholder="eng.abdelrahman1137@gmail.com"
                       className="w-full text-right px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white text-slate-800 text-xs"
                       required
                     />
@@ -687,7 +685,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       {/* تذييل */}
       <footer className="py-4 text-center text-slate-400 text-xs border-t border-slate-200 bg-white space-y-1">
         <div>&copy; {new Date().getFullYear()} GEMS International CRM. جميع الحقوق محفوظة لمجموعة GEMS للحلول المتكاملة.</div>
-        <div className="text-[11px] font-bold text-slate-500">تم التطوير بواسطة <span className="text-red-600">mohamed atef naji</span></div>
+        <div className="text-[11px] font-bold text-slate-500">تحت إشراف وتطوير <span className="text-red-600">م. عبد الرحمن (الإدارة)</span></div>
       </footer>
     </div>
   );

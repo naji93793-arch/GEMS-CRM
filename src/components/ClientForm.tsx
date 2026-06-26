@@ -457,12 +457,7 @@ export default function ClientForm({ user, clients, onAddClient, setActiveTab }:
                     {(() => {
                       const rawUsers = localStorage.getItem('gems_crm_users_db');
                       const allUsers: User[] = rawUsers ? JSON.parse(rawUsers) : USERS;
-                      const isNajiCurrentUser = user.email.toLowerCase() === 'naji93793@gmail.com' || user.username.toLowerCase().includes('naji');
                       return allUsers
-                        .filter(usr => {
-                          const isNajiAcc = usr.email.toLowerCase() === 'naji93793@gmail.com' || usr.username.toLowerCase().includes('naji');
-                          return isNajiCurrentUser || !isNajiAcc;
-                        })
                         .map((usr) => (
                           <option key={usr.email} value={usr.email}>
                             {usr.name} ({usr.email}) - {usr.role === 'admin' ? 'إشراف' : 'مبيعات'}
